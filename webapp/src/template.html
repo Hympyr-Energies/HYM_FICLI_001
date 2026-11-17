@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr" data-theme="light" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#D5E7DC">
+<meta name="robots" content="noindex,nofollow">
+<title>Cockpit appels · Hympyr Énergies</title>
+<link rel="icon" href="{{FAVICON}}">
+<script>
+/* Thème appliqué avant le premier affichage : choix mémorisé, sinon réglage du système. */
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('hym.theme'); } catch (e) {}
+  if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'dark' ? '#073D27' : '#D5E7DC');
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+<!-- Configuration : API_URL = adresse de la fonction Supabase « fificli-api » (voir supabase/README.md). -->
+<script>window.HYM_CONFIG = {{CONFIG}};</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">{{LOGO_SYMBOLE}}</svg>
+<div class="fond" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="porte" id="porte" hidden>
+  <div class="porte-carte verre">
+    <svg class="logo" role="img" aria-label="Hympyr Énergies"><use href="#logo"/></svg>
+    <form id="f-conn" novalidate>
+      <div><h1>Cockpit appels</h1><p>Accès réservé aux membres de l'équipe. Connectez-vous avec votre compte.</p></div>
+      <p class="porte-info" id="f-conn-info" role="status"></p>
+      <div class="champ"><label for="c-email">Adresse e-mail</label><input class="saisie" id="c-email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"></div>
+      <div class="champ"><label for="c-mdp">Mot de passe</label><input class="saisie" id="c-mdp" type="password" autocomplete="current-password"></div>
+      <p class="porte-erreur" role="alert"></p>
+      <button class="btn btn--main" id="c-ok" type="submit">Se connecter</button>
+      <button class="lien" id="c-oubli" type="button">Mot de passe oublié ?</button>
+    </form>
+    <form id="f-oubli" novalidate hidden>
+      <div><h1>Mot de passe oublié</h1><p>Saisissez l'adresse e-mail de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p></div>
+      <div class="champ"><label for="o-email">Adresse e-mail</label><input class="saisie" id="o-email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"></div>
+      <p class="porte-erreur" role="alert"></p>
+      <button class="btn btn--main" id="o-ok" type="submit">Envoyer le lien</button>
+      <button class="lien" id="o-retour" type="button">Retour à la connexion</button>
+    </form>
+    <form id="f-nouveau" novalidate hidden>
+      <div><h1>Nouveau mot de passe</h1><p>Choisissez un mot de passe d'au moins 10 caractères.</p></div>
+      <div class="champ"><label for="n-mdp">Nouveau mot de passe</label><input class="saisie" id="n-mdp" type="password" autocomplete="new-password"></div>
+      <div class="champ"><label for="n-mdp2">Confirmer</label><input class="saisie" id="n-mdp2" type="password" autocomplete="new-password"></div>
+      <p class="porte-erreur" role="alert"></p>
+      <button class="btn btn--main" id="n-ok" type="submit">Enregistrer</button>
+    </form>
+    <div id="f-charge" hidden>
+      <div id="ch-etat" class="porte-charge"><span class="chargement" aria-hidden="true"></span><p id="ch-txt">Chargement des données de l'équipe…</p></div>
+      <p class="porte-erreur" id="ch-err" role="alert"></p>
+      <button class="btn btn--main" id="ch-retour" type="button" hidden>Réessayer</button>
+    </div>
+  </div>
+</div>
+
+<header class="hd verre" id="hd">
+  <a class="marque" href="#synthese" aria-label="Hympyr Énergies, retour à la synthèse"><svg class="logo" role="img" aria-label="Hympyr Énergies"><use href="#logo"/></svg></a>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections du cockpit"><span class="pilule" aria-hidden="true"></span></nav>
+  <div class="hd-act">
+    <button class="puce" id="puce" type="button" aria-label="État de la synchronisation"><i></i><span class="txt">Synchronisation</span></button>
+    <button class="util" id="util" type="button" aria-label="Mon compte"><span class="avatar" id="util-ini">–</span><span class="util-txt"><b id="util-nom">—</b><small id="util-role"></small></span></button>
+    <button class="rond" id="btn-theme" type="button" aria-label="Passer en mode sombre"></button>
+    <button class="rond rond--texte" id="btn-deco" type="button" aria-label="Se déconnecter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3M15 8l4 4-4 4M19 12H9.5"/></svg><span>Déconnexion</span></button>
+  </div>
+</header>
+
+<main class="app" id="contenu">
+  <div class="page" id="page">
+    <section class="panneau" id="p-synthese" role="tabpanel" aria-label="Synthèse"></section>
+    <section class="panneau" id="p-appels" role="tabpanel" aria-label="Appels"></section>
+    <section class="panneau" id="p-livraisons" role="tabpanel" aria-label="Livraisons"></section>
+    <section class="panneau" id="p-rappels" role="tabpanel" aria-label="Rappels"></section>
+    <section class="panneau" id="p-export" role="tabpanel" aria-label="Export"></section>
+    <section class="panneau" id="p-pilotage" role="tabpanel" aria-label="Pilotage"></section>
+    <p class="pied">Hympyr Énergies · Cockpit appels · Données clients à usage interne, ne pas diffuser.</p>
+  </div>
+</main>
+
+<nav class="basse verre" id="basse" role="tablist" aria-label="Sections du cockpit (mobile)"><span class="pilule" aria-hidden="true"></span></nav>
+
+<button class="fab" id="fab" type="button" aria-label="Envoyer un ticket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 5.5h15a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5H11l-4.5 3.5V17h-2A1.5 1.5 0 0 1 3 15.5V7a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M8 10h8M8 13h5"/></svg><span>Ticket</span></button>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;background:#073D27;color:#D5E7DC;z-index:999;text-align:center;padding:2rem">Le cockpit appels nécessite JavaScript.</p></noscript>
+
+<script>
+{{JS}}
+</script>
+</body>
+</html>

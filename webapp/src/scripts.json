@@ -1,0 +1,748 @@
+{
+ "ordre": [
+  "particulier",
+  "pro",
+  "collectivite"
+ ],
+ "scripts": {
+  "particulier": {
+   "cle": "particulier",
+   "libelle": "Particulier",
+   "couleur": "#2e7d32",
+   "regles_or": [
+    "Ne jamais ouvrir par « mise à jour de fichier » : ça sonne administratif, le client décroche mentalement en trois secondes.",
+    "Quand le client explique pourquoi il est parti : écouter, ne pas se justifier, ne pas contredire. Le retour a plus de valeur que la défense.",
+    "Ne pas redemander mécaniquement toutes les informations si elles sont déjà bonnes."
+   ],
+   "etapes": [
+    {
+     "numero": "1",
+     "titre": "Ouverture",
+     "dire": [
+      "Bonjour Madame/Monsieur {client}, {appelant} de chez Hympyr Énergies. Je me permets de vous appeler car cela fait quelque temps que nous n'avons pas eu l'occasion d'échanger avec vous. Vous aviez auparavant commandé chez nous pour {produit}.",
+      "Je voulais simplement prendre de vos nouvelles et savoir si vous utilisez toujours ce type d'énergie aujourd'hui. Vous avez une petite minute ?"
+     ],
+     "relances": [],
+     "note": "Objectif : ne pas commencer par « mise à jour de fichier », qui donne immédiatement une impression administrative ou commerciale.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "2",
+     "titre": "Comprendre la situation actuelle",
+     "dire": [],
+     "relances": [],
+     "note": "",
+     "branches_titre": "Le client consomme-t-il toujours la même énergie ?",
+     "branches": [
+      {
+       "label": "Oui, même énergie",
+       "dire": [
+        "D'accord. Et aujourd'hui, vous vous approvisionnez toujours de la même manière ?"
+       ],
+       "relances": [
+        "Vous commandez toujours à peu près aux mêmes périodes ?",
+        "Vous avez changé quelque chose depuis notre dernière commande ?",
+        "Vous êtes satisfait de votre organisation actuelle ?",
+        "Est-ce qu'il y a quelque chose qui vous ferait revenir chez Hympyr ?"
+       ],
+       "note": ""
+      },
+      {
+       "label": "Non, il ne consomme plus",
+       "dire": [
+        "D'accord, je comprends. Vous êtes passé sur quel type d'énergie aujourd'hui ?",
+        "Et vous êtes satisfait de ce changement ?"
+       ],
+       "relances": [],
+       "note": "Ces deux questions permettent de comprendre l'évolution du parc clients sans transformer l'appel en argumentaire de vente. On ne cherche pas à faire revenir quelqu'un qui a changé de chaudière."
+      }
+     ],
+     "groupe": ""
+    },
+    {
+     "numero": "3",
+     "titre": "La question charnière",
+     "dire": [
+      "Et si vous ne commandez plus chez nous aujourd'hui, c'est simplement parce que vos habitudes ont changé, ou est-ce qu'il y avait une raison particulière à l'époque ?"
+     ],
+     "relances": [],
+     "note": "Laisser le client parler. Ne pas chercher à se justifier immédiatement.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "4",
+     "titre": "Comprendre pourquoi le client est parti",
+     "dire": [
+      "Je comprends. Si ce n'est pas indiscret, qu'est-ce qui vous avait amené à changer ? C'est justement intéressant pour nous de le savoir.",
+      "Merci de me le dire. L'objectif de mon appel est aussi de comprendre ce qui a changé pour vous. Ça nous permet de rester à l'écoute de nos anciens clients."
+     ],
+     "relances": [
+      "Motifs à cocher : prix · disponibilité · délai de livraison · relation commerciale · qualité de service · déménagement · changement de chauffage · consommation trop faible · autre fournisseur recommandé · mauvaise expérience."
+     ],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "5",
+     "titre": "Vérification des informations",
+     "dire": [
+      "J'en profite simplement pour vérifier que nous avons toujours les bonnes coordonnées, notamment si nous devons vous contacter ou vous transmettre un document."
+     ],
+     "relances": [
+      "Nom / prénom",
+      "Adresse de facturation",
+      "Adresse de livraison si différente",
+      "Téléphone",
+      "Adresse e-mail",
+      "Informations utiles à la livraison (accès, cuve, portail, chien…)",
+      "Énergie actuellement utilisée"
+     ],
+     "note": "Ne pas demander mécaniquement toutes les informations si elles sont déjà correctes. On confirme, on ne réinterroge pas.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "6",
+     "titre": "Faire émerger une opportunité de retour",
+     "dire": [
+      "Et si vous aviez besoin de {produit} dans les prochains mois, est-ce que vous seriez susceptible de refaire appel à nous ?",
+      "Très bien. Dans ce cas, je peux simplement noter que vous êtes toujours susceptible d'avoir besoin de {produit}. L'idée n'est pas de vous solliciter inutilement, mais que nous sachions comment vous accompagner si besoin."
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "7",
+     "titre": "Conclusion",
+     "dire": [
+      "Merci pour votre temps et pour ces informations. Ça nous permet de mieux connaître la situation de nos anciens clients et de ne pas avoir des informations qui datent de plusieurs années.",
+      "Et si vous avez à nouveau besoin de {produit}, n'hésitez pas à penser à nous. Nous serons ravis de reprendre contact avec vous.",
+      "Je vous souhaite une très bonne journée, Madame/Monsieur {client}."
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    }
+   ],
+   "objections": [
+    {
+     "intitule": "Pourquoi vous m'appelez ?",
+     "dire": [
+      "Tout simplement parce que cela fait un moment que nous n'avons pas échangé. On reprend contact avec certains de nos anciens clients pour savoir où ils en sont aujourd'hui et vérifier que nous avons toujours les bonnes informations. C'est surtout l'occasion de reprendre contact."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Vous voulez me vendre quelque chose ?",
+     "dire": [
+      "Non, ce n'est pas l'objectif premier de l'appel. Je cherche surtout à savoir si vous utilisez toujours {produit}, comment vous vous approvisionnez aujourd'hui et si vous avez été satisfait de votre changement. Si vous avez un besoin à l'avenir, nous serons évidemment là."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je ne commande plus chez vous, c'était trop cher.",
+     "dire": [
+      "Je comprends. Le prix est évidemment important. Est-ce que c'est principalement ce qui avait motivé votre changement ?"
+     ],
+     "conduite": "Écouter jusqu'au bout avant de répondre. Ne pas comparer les prix au téléphone.",
+     "puis": [
+      "Merci pour votre retour. Je vais le noter, c'est justement le type de retour qui nous permet de mieux comprendre pourquoi certains clients ne reviennent plus."
+     ],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je ne chauffe plus au fioul.",
+     "dire": [
+      "D'accord. Vous avez changé pour quelle solution ? Et vous en êtes satisfait aujourd'hui ?"
+     ],
+     "conduite": "Noter le changement d'énergie sur la fiche : c'est l'information la plus utile de tout l'appel pour la suite de la campagne.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je n'ai pas le temps.",
+     "dire": [
+      "Aucun problème, je comprends. Je voulais simplement reprendre contact avec vous. Si vous préférez, je peux simplement vérifier avec vous que nous avons toujours vos bonnes coordonnées et ne pas vous retenir davantage."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je ne veux pas donner mes informations.",
+     "dire": [
+      "Je comprends tout à fait. Nous ne cherchons pas à vous demander des informations qui ne seraient pas nécessaires. L'objectif est simplement de vérifier que les coordonnées que nous avons déjà sont toujours correctes."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je ne veux plus être contacté.",
+     "dire": [
+      "Bien entendu, je le prends en compte. Merci de me l'avoir précisé. Je vais faire le nécessaire pour que nous respections votre demande."
+     ],
+     "conduite": "Fin de l'appel. Ne pas poser de question supplémentaire, ne pas tenter de comprendre pourquoi.",
+     "puis": [],
+     "alerte": "RGPD — droit d'opposition (art. 21). Cette demande doit être ENREGISTRÉE dans l'outil, pas seulement dite au téléphone. Coche la case « opposition » sur la fiche avant de passer à l'appel suivant : une promesse orale non tracée est un manquement."
+    }
+   ],
+   "a_consigner": [
+    "Énergie utilisée aujourd'hui (et si changement : laquelle)",
+    "Motif du départ, dans les mots du client",
+    "Coordonnées vérifiées / corrigées",
+    "Susceptible de recommander : oui / non / période",
+    "Opposition à être recontacté : à cocher impérativement si le client le demande"
+   ]
+  },
+  "pro": {
+   "cle": "pro",
+   "libelle": "Professionnel",
+   "couleur": "#e07b00",
+   "regles_or": [
+    "On prend des nouvelles de l'activité, pas du fichier. Un pro sent en dix secondes si l'appel parle de lui ou de notre base de données.",
+    "Face à une mauvaise expérience : ne pas se défendre, écouter, noter, faire remonter. C'est la seule attitude qui laisse une porte ouverte.",
+    "La question qui fait tout l'appel : « qu'est-ce qu'il faudrait qu'Hympyr fasse différemment ? »"
+   ],
+   "etapes": [
+    {
+     "numero": "1",
+     "titre": "Ouverture",
+     "dire": [
+      "Bonjour Monsieur/Madame {client}, {appelant} de chez Hympyr Énergies. Je me permets de vous appeler car cela fait quelque temps que nous n'avons pas eu l'occasion de travailler ensemble.",
+      "Vous aviez l'habitude de vous approvisionner chez nous en {produit}. Je voulais simplement prendre de vos nouvelles, savoir comment votre activité évolue et si vous avez toujours les mêmes besoins en carburant. Je ne vais pas vous retenir longtemps."
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "2",
+     "titre": "Comprendre l'activité actuelle",
+     "dire": [],
+     "relances": [],
+     "note": "",
+     "branches_titre": "Choisir le métier du client",
+     "branches": [
+      {
+       "label": "TP / BTP",
+       "dire": [
+        "Vous avez toujours votre activité de travaux publics ?"
+       ],
+       "relances": [
+        "Votre parc d'engins est resté à peu près le même ?",
+        "Vous utilisez toujours du GNR pour vos engins ?",
+        "Vos besoins ont augmenté ou diminué ces dernières années ?",
+        "Vous vous faites toujours livrer directement sur vos chantiers ou plutôt sur votre dépôt ?"
+       ],
+       "note": ""
+      },
+      {
+       "label": "Transport",
+       "dire": [
+        "Vous êtes toujours sur une activité de transport ?"
+       ],
+       "relances": [
+        "Votre flotte a évolué depuis notre dernière commande ?",
+        "Vous vous approvisionnez toujours de la même manière ?",
+        "Vous avez principalement besoin de carburant pour votre flotte ou également pour votre dépôt ?"
+       ],
+       "note": ""
+      },
+      {
+       "label": "Agriculture",
+       "dire": [
+        "Vous êtes toujours en activité agricole ?"
+       ],
+       "relances": [
+        "Votre parc de tracteurs et d'engins a évolué ?",
+        "Vous utilisez toujours du GNR ?",
+        "Vous stockez toujours votre carburant sur l'exploitation ?",
+        "Vos besoins sont plutôt concentrés sur certaines périodes de l'année ?"
+       ],
+       "note": "La saisonnalité est l'information à ramener : semis, moisson, vendanges. Elle vaut une date de rappel."
+      }
+     ],
+     "groupe": "metier"
+    },
+    {
+     "numero": "3",
+     "titre": "Comprendre le changement de fournisseur",
+     "dire": [
+      "Et aujourd'hui, vous vous approvisionnez auprès de qui ou de quelle manière ?",
+      "Est-ce que je peux vous demander ce qui vous avait fait changer à l'époque ?"
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "Selon le motif invoqué",
+     "branches": [
+      {
+       "label": "Prix",
+       "dire": [
+        "Je comprends. Et aujourd'hui, le prix reste votre principal critère de choix ou d'autres éléments comptent également, comme la disponibilité ou les délais ?"
+       ],
+       "relances": [],
+       "note": ""
+      },
+      {
+       "label": "Livraison",
+       "dire": [
+        "D'accord. Et qu'est-ce qui est important pour vous aujourd'hui dans une livraison ? La rapidité, la possibilité d'être livré sur site, la souplesse… ?"
+       ],
+       "relances": [],
+       "note": ""
+      },
+      {
+       "label": "Disponibilité",
+       "dire": [
+        "Je comprends. C'est particulièrement important lorsqu'un engin ou un véhicule doit continuer à travailler. Aujourd'hui, vous êtes satisfait de la disponibilité de votre fournisseur ?"
+       ],
+       "relances": [],
+       "note": ""
+      },
+      {
+       "label": "Mauvaise expérience Hympyr",
+       "dire": [
+        "Je suis désolé que vous ayez eu cette expérience. Merci de me le dire franchement. Est-ce que vous pouvez m'expliquer ce qui s'était passé ?",
+        "Merci pour votre retour. C'est important pour nous de le savoir."
+       ],
+       "relances": [],
+       "note": "Ne pas se défendre. Écouter et noter. Le litige doit remonter en interne même si le client ne redevient pas client."
+      }
+     ],
+     "groupe": ""
+    },
+    {
+     "numero": "4",
+     "titre": "Tester la possibilité de revenir",
+     "dire": [
+      "Si demain vous aviez besoin d'un nouveau fournisseur, qu'est-ce qu'il faudrait que Hympyr fasse différemment pour que vous envisagiez de retravailler avec nous ?",
+      "Et aujourd'hui, est-ce que vous seriez ouvert à nous consulter ponctuellement si vous aviez un besoin ?"
+     ],
+     "relances": [],
+     "note": "C'est LA question du script. Elle transforme l'appel en entretien de reconquête plutôt qu'en mise à jour administrative. Retranscrire la réponse mot à mot.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "5",
+     "titre": "Mise à jour des informations",
+     "dire": [
+      "J'aimerais également profiter de notre échange pour vérifier que nous avons toujours les bonnes informations vous concernant. Comme cela fait quelque temps que nous n'avons pas travaillé ensemble, je préfère que notre dossier soit correctement à jour."
+     ],
+     "relances": [
+      "Raison sociale",
+      "Nom du responsable / interlocuteur",
+      "Téléphone",
+      "E-mail",
+      "Adresse de facturation",
+      "Adresse du dépôt",
+      "Adresses de livraison éventuelles",
+      "Activité actuelle",
+      "Énergies utilisées",
+      "SIREN / SIRET et informations nécessaires à la facturation"
+     ],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "6",
+     "titre": "Introduire la facturation électronique",
+     "dire": [
+      "Nous faisons aussi ce travail parce que les entreprises doivent progressivement s'adapter à la généralisation de la facturation électronique. Depuis le 1er septembre 2026, toutes les entreprises doivent être en mesure de recevoir leurs factures au format électronique, et pour les TPE et PME, l'émission devient obligatoire au 1er septembre 2027. L'idée est donc d'avoir des informations clients fiables et à jour.",
+      "Mais au-delà de l'aspect administratif, cela nous permet surtout de savoir si votre activité et vos besoins ont changé depuis notre dernière commande."
+     ],
+     "relances": [],
+     "note": "C'est la seconde phrase qui compte : toujours refermer sur le client, jamais sur l'administratif. Fait vérifié (calendrier officiel, economie.gouv.fr) : réception obligatoire pour TOUTES les entreprises assujetties à la TVA au 01/09/2026 ; émission au 01/09/2026 pour les grandes entreprises et ETI, au 01/09/2027 pour les PME, TPE et micro-entreprises. L'acheminement se fait par SIREN/SIRET via l'annuaire : c'est ce qui justifie concrètement qu'on demande le SIREN.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "7",
+     "titre": "Identifier un besoin futur",
+     "dire": [
+      "Et sur les prochains mois, vous pensez avoir des besoins en {produit} ?",
+      "Vous avez déjà une idée des périodes auxquelles vous aurez besoin d'être livré ?",
+      "Très bien. Je préfère le noter pour que nous sachions quand vous serez susceptible d'avoir besoin de nous, plutôt que de vous appeler au hasard."
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "8",
+     "titre": "Conclusion",
+     "dire": [
+      "Merci pour votre temps. Ça m'a surtout permis de prendre de vos nouvelles et de comprendre comment votre activité a évolué depuis notre dernière commande.",
+      "Je mets votre dossier à jour avec les informations que vous m'avez données. Et si vous avez besoin de nous à nouveau, même ponctuellement, n'hésitez pas à nous solliciter.",
+      "Bonne continuation et bonne journée à vous."
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    }
+   ],
+   "objections": [
+    {
+     "intitule": "Je travaille déjà avec quelqu'un.",
+     "dire": [
+      "Bien sûr, je comprends. Est-ce que vous êtes satisfait de votre fournisseur actuel ?"
+     ],
+     "conduite": "L'objectif n'est pas de dénigrer le concurrent, mais de comprendre les attentes.",
+     "puis": [
+      "Et si vous deviez changer quelque chose dans votre approvisionnement actuel, ce serait quoi ?"
+     ],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je prends chez celui qui est moins cher.",
+     "dire": [
+      "Je comprends. Sur le carburant, le prix est évidemment un critère important. Est-ce que vous regardez uniquement le prix ou également la livraison, les délais et la disponibilité ?"
+     ],
+     "conduite": "Puis écouter. Ne pas enchaîner sur une comparaison tarifaire au téléphone.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je n'ai plus besoin de GNR.",
+     "dire": [
+      "D'accord. Votre activité a évolué ou vous avez changé d'équipement ?",
+      "Vous utilisez aujourd'hui quelle énergie pour vos engins ?"
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je n'ai pas le temps.",
+     "dire": [
+      "Aucun souci. Je voulais surtout savoir si vous aviez toujours la même activité et si vous utilisiez toujours {produit}. Si vous me confirmez simplement cela, je ne vous retiens pas davantage."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Vous appelez juste pour mettre votre fichier à jour ?",
+     "dire": [
+      "C'est une partie de la démarche, oui, mais ce n'est pas la seule raison. Comme cela fait longtemps que nous n'avons pas travaillé ensemble, nous souhaitons surtout comprendre ce qui a changé pour vous : votre activité, vos besoins, votre façon de vous approvisionner. La mise à jour administrative vient en complément."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Je ne veux pas vous donner mon SIREN / mes informations.",
+     "dire": [
+      "Je comprends. Je ne souhaite pas vous demander d'informations inutiles. Certaines données administratives sont simplement nécessaires pour fiabiliser nos dossiers et, pour les entreprises concernées, préparer les évolutions liées à la facturation électronique. Si vous préférez, nous pouvons nous limiter aux coordonnées que vous souhaitez actualiser."
+     ],
+     "conduite": "Argument factuel disponible si le client insiste : le SIREN sert à l'acheminement de la facture électronique via l'annuaire. Sans lui, la facture n'arrive pas. Le SIREN est par ailleurs une donnée publique (annuaire des entreprises), ce qui désamorce souvent la réticence.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Pourquoi vous me parlez de facturation électronique ?",
+     "dire": [
+      "Parce que la réglementation évolue. Depuis le 1er septembre 2026, toute entreprise doit pouvoir recevoir ses factures au format électronique, et à partir du 1er septembre 2027 les TPE et PME devront également être en mesure de les émettre. Nous profitons donc de cette période pour fiabiliser progressivement nos données clients.",
+      "Mais mon appel n'est pas uniquement administratif : cela faisait surtout longtemps que nous n'avions pas échangé et je voulais savoir où vous en étiez aujourd'hui."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Vous essayez de me faire revenir chez Hympyr ?",
+     "dire": [
+      "Si vous avez de nouveau besoin de nous, bien sûr que nous serons heureux de retravailler avec vous. Mais je préfère d'abord comprendre pourquoi nous ne travaillons plus ensemble et ce qui est important pour vous aujourd'hui."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "J'ai eu un problème avec Hympyr à l'époque.",
+     "dire": [
+      "Je suis désolé de l'entendre. Est-ce que vous pouvez me raconter ce qui s'était passé ?",
+      "Merci de me l'avoir expliqué. Je préfère avoir ce type de retour plutôt que de faire comme si tout s'était bien passé. Je vais le faire remonter en interne."
+     ],
+     "conduite": "Laisser parler. Ne jamais interrompre, ne jamais expliquer « ce qui s'est réellement passé ». Noter les faits, la date approximative, le montant si évoqué.",
+     "puis": [
+      "Si le contexte s'y prête seulement : « Si vous deviez envisager de retravailler avec nous un jour, qu'est-ce qu'il faudrait absolument que nous améliorions ? »"
+     ],
+     "alerte": "Un litige évoqué au téléphone doit être tracé dans la fiche ET remonté. S'il ne l'est pas, la promesse faite au client est fausse."
+    },
+    {
+     "intitule": "Je ne veux plus être client chez Hympyr.",
+     "dire": [
+      "Je comprends et je respecte votre décision. Est-ce que vous accepteriez simplement de me dire ce qui vous avait conduit à arrêter de travailler avec nous ? Cela nous aiderait à comprendre ce que nous pouvons améliorer."
+     ],
+     "conduite": "Puis ne pas insister. Une relance de plus transforme un ancien client neutre en détracteur actif.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Envoyez-moi vos tarifs.",
+     "dire": [
+      "Bien sûr. Pour vous envoyer quelque chose qui corresponde réellement à votre besoin, est-ce que vous utilisez toujours {produit} et sur quel type d'activité ?",
+      "Très bien. Je préfère vous envoyer quelque chose de pertinent plutôt qu'une offre générale."
+     ],
+     "conduite": "Recueillir uniquement les informations utiles : produit, volume approximatif, adresse de livraison, e-mail. Puis créer la tâche d'envoi, sinon la promesse est perdue.",
+     "puis": [],
+     "alerte": ""
+    }
+   ],
+   "a_consigner": [
+    "Activité toujours en cours : oui / non — évolution du parc ou de la flotte",
+    "Fournisseur actuel et motif du changement",
+    "Réponse mot à mot à « qu'est-ce qu'il faudrait faire différemment ? »",
+    "Période(s) de besoin annoncée(s) → date de rappel",
+    "SIREN / SIRET, e-mail de facturation, adresses de livraison",
+    "Litige à faire remonter en interne : oui / non"
+   ]
+  },
+  "collectivite": {
+   "cle": "collectivite",
+   "libelle": "Collectivité",
+   "couleur": "#1565c0",
+   "regles_or": [
+    "Vérifier d'abord qu'on parle à la bonne personne : dans une collectivité, l'interlocuteur change plus souvent que le besoin.",
+    "Ne jamais remettre en cause le marché en cours. On se positionne pour la prochaine consultation.",
+    "Repartir avec deux choses : les critères de choix actuels et la période de la prochaine consultation."
+   ],
+   "etapes": [
+    {
+     "numero": "1",
+     "titre": "Ouverture",
+     "dire": [
+      "Bonjour, {appelant} de chez Hympyr Énergies. Je me permets de vous appeler car nous avons travaillé avec {collectivite} par le passé et cela fait quelque temps que nous n'avons pas eu l'occasion d'échanger.",
+      "Je souhaitais simplement faire un point avec vous sur vos besoins actuels et vérifier que nous avons toujours les bons interlocuteurs et les bonnes informations. Est-ce que je peux vous prendre une minute ?"
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "2",
+     "titre": "Identifier le bon interlocuteur",
+     "dire": [
+      "Êtes-vous toujours la personne qui suit les approvisionnements en {produit} pour la collectivité ?",
+      "D'accord, pourriez-vous m'indiquer à qui je peux m'adresser aujourd'hui ?"
+     ],
+     "relances": [
+      "Nom du nouvel interlocuteur",
+      "Fonction",
+      "Téléphone",
+      "E-mail professionnel",
+      "Service concerné"
+     ],
+     "note": "Si l'interlocuteur a changé : c'est la donnée la plus précieuse de l'appel. Un dossier collectivité avec le mauvais nom est un dossier mort.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "3",
+     "titre": "Comprendre les besoins actuels",
+     "dire": [
+      "Et concernant vos approvisionnements, vous utilisez toujours {produit} aujourd'hui ?"
+     ],
+     "relances": [
+      "Vos besoins sont-ils restés sensiblement les mêmes ?",
+      "Avez-vous de nouveaux bâtiments ou équipements à approvisionner ?",
+      "Votre organisation d'approvisionnement a-t-elle changé ?",
+      "Travaillez-vous toujours avec les mêmes fournisseurs ?"
+     ],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "4",
+     "titre": "Comprendre pourquoi Hympyr n'est plus sollicité",
+     "dire": [
+      "Est-ce que je peux vous demander ce qui a motivé ce changement ? C'est surtout pour comprendre vos attentes actuelles.",
+      "Était-ce principalement lié au prix, aux marchés publics, aux délais, à la disponibilité ou à la qualité du service ?"
+     ],
+     "relances": [],
+     "note": "Ne pas chercher à contredire. En collectivité, la réponse est souvent « la procédure », pas « vous ». C'est une bonne nouvelle : ça se rejoue à chaque consultation.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "5",
+     "titre": "Vérification administrative",
+     "dire": [
+      "J'aimerais également vérifier que nous avons les bonnes informations administratives dans notre dossier, notamment les coordonnées du service concerné et les informations nécessaires à la facturation."
+     ],
+     "relances": [
+      "Raison sociale exacte",
+      "Adresse",
+      "Coordonnées du service",
+      "Interlocuteur",
+      "E-mail",
+      "Informations de facturation",
+      "Informations de livraison",
+      "Références administratives nécessaires (n° d'engagement, service exécutant, code service)"
+     ],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "6",
+     "titre": "Facturation électronique — la bonne formulation",
+     "dire": [
+      "Nous profitons également de cette campagne pour fiabiliser les informations administratives de nos clients et anciens clients, notamment parce que les échanges de factures évoluent avec la généralisation de la facturation électronique."
+     ],
+     "relances": [],
+     "note": "Ne PAS présenter la réforme comme une « obligation de mise à jour du fichier client ». Pour la sphère publique, Chorus Pro reste la plateforme de référence : la facturation électronique y est déjà obligatoire depuis 2020, ce n'est donc pas une nouveauté pour eux. L'enjeu réel de notre côté : disposer du code service, du n° d'engagement et du SIRET exact, sans lesquels une facture est rejetée.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "7",
+     "titre": "Réouvrir la relation commerciale",
+     "dire": [
+      "Et si un besoin devait se présenter dans les prochains mois, est-ce que Hympyr pourrait de nouveau être consulté ?",
+      "Très bien. Qu'est-ce qui serait important pour vous aujourd'hui dans le choix d'un fournisseur ?"
+     ],
+     "relances": [],
+     "note": "Question la plus rentable du script : elle donne les critères de décision actuels de la collectivité. À retranscrire mot à mot dans le commentaire de la fiche.",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    },
+    {
+     "numero": "8",
+     "titre": "Conclusion",
+     "dire": [
+      "Merci beaucoup pour votre temps. Ça nous permet de remettre notre dossier à jour, mais surtout de savoir comment vous fonctionnez aujourd'hui.",
+      "Si un besoin se présente, n'hésitez pas à revenir vers nous. Nous serons ravis de pouvoir échanger à nouveau avec vous.",
+      "Très bonne journée à vous."
+     ],
+     "relances": [],
+     "note": "",
+     "branches_titre": "",
+     "branches": [],
+     "groupe": ""
+    }
+   ],
+   "objections": [
+    {
+     "intitule": "Nous avons un marché en cours.",
+     "dire": [
+      "Bien sûr, je comprends. Je ne cherche pas à remettre en cause votre marché actuel. Je souhaitais simplement savoir comment vous fonctionnez aujourd'hui et vérifier que nous avons les bons interlocuteurs. Nous pourrons ainsi rester disponibles lorsqu'une nouvelle consultation se présentera."
+     ],
+     "conduite": "Noter impérativement l'échéance du marché si elle est donnée : c'est la date de rappel la plus qualifiée qu'on puisse obtenir.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Nous devons passer par un marché public.",
+     "dire": [
+      "Bien entendu. C'est justement intéressant pour nous de connaître votre fonctionnement actuel. À quel moment avez-vous généralement l'occasion de consulter de nouveaux fournisseurs ?"
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Nous travaillons déjà avec un autre fournisseur.",
+     "dire": [
+      "Je comprends. Est-ce que vous êtes satisfait de cette organisation ?"
+     ],
+     "conduite": "",
+     "puis": [
+      "Et si vous deviez retenir un point important pour votre prochain fournisseur, ce serait lequel ?"
+     ],
+     "alerte": ""
+    },
+    {
+     "intitule": "Envoyez-nous plutôt un mail.",
+     "dire": [
+      "Bien sûr. Pour vous envoyer quelque chose de pertinent, pouvez-vous simplement me confirmer le bon interlocuteur et son adresse e-mail ?",
+      "Et est-ce que vous souhaitez plutôt recevoir nos coordonnées pour pouvoir nous solliciter en cas de besoin, ou une présentation de nos services ?"
+     ],
+     "conduite": "Ne jamais raccrocher sur un « envoyez un mail » sans avoir obtenu l'adresse nominative. Une adresse générique de mairie = appel perdu.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Nous n'avons plus besoin de ce produit.",
+     "dire": [
+      "D'accord. Vos besoins ont complètement disparu ou vous avez simplement changé votre mode d'approvisionnement ?"
+     ],
+     "conduite": "Comprendre l'évolution : bâtiment vendu, chaufferie remplacée, flotte transférée à l'intercommunalité. Le besoin a souvent juste déménagé.",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Pourquoi avez-vous besoin de ces informations ?",
+     "dire": [
+      "Principalement pour éviter de travailler avec des informations qui ne sont plus à jour. Nous reprenons contact avec nos anciens clients pour mieux comprendre leur situation actuelle et fiabiliser nos dossiers administratifs."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Nous ne sommes plus intéressés.",
+     "dire": [
+      "Je comprends parfaitement. Est-ce que je peux simplement vous demander ce qui a changé depuis notre dernière collaboration ? C'est uniquement pour que nous comprenions mieux les attentes actuelles de nos anciens clients."
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    },
+    {
+     "intitule": "Nous n'avons pas de besoin actuellement.",
+     "dire": [
+      "Aucun problème. Je préfère justement le savoir plutôt que de vous solliciter inutilement. Est-ce que vous souhaitez que nous conservions simplement vos coordonnées afin de pouvoir vous recontacter uniquement si vous nous le demandez ?"
+     ],
+     "conduite": "",
+     "puis": [],
+     "alerte": ""
+    }
+   ],
+   "a_consigner": [
+    "Interlocuteur actuel : nom, fonction, service, e-mail direct",
+    "Marché en cours : oui / non — et échéance si connue",
+    "Période habituelle de consultation",
+    "Critères de choix cités, dans leurs mots",
+    "Données Chorus : SIRET, code service, n° d'engagement"
+   ]
+  }
+ }
+}
