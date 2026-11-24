@@ -678,7 +678,7 @@ body:not(.pret) .hd,body:not(.pret) .app,body:not(.pret) .basse,body:not(.pret) 
     <button class="puce" id="puce" type="button" aria-label="État de la synchronisation"><i></i><span class="txt">Synchronisation</span></button>
     <button class="util" id="util" type="button" aria-label="Mon compte"><span class="avatar" id="util-ini">–</span><span class="util-txt"><b id="util-nom">—</b><small id="util-role"></small></span></button>
     <button class="rond" id="btn-theme" type="button" aria-label="Passer en mode sombre"></button>
-    <button class="rond rond--texte" id="btn-deco" type="button" aria-label="Se déconnecter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3M15 8l4 4-4 4M19 12H9.5"/></svg><span>Déconnexion</span></button>
+    <button class="rond" id="btn-deco" type="button" aria-label="Retour au portail" title="Retour au portail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></button>
   </div>
 </header>
 
@@ -2955,7 +2955,8 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
       });
     });
     $('#btn-theme').onclick = APP.theme.basculer; APP.theme.appliquer(APP.theme.courant(), false);
-    $('#btn-deco').onclick = function () { APP.confirmer({ titre: 'Se déconnecter ?', texte: 'Vos saisies sont déjà enregistrées dans la base commune.', ok: 'Se déconnecter' }).then(function (ok) { if (ok) APP.verrouiller(); }); };
+    // Retour à l'accueil du portail, session conservée : la déconnexion se fait au portail, pour tous les outils à la fois.
+    $('#btn-deco').onclick = function () { location.assign(APP.portail.url()); };
     $('#util').onclick = compte; $('#puce').onclick = actualiserMaintenant;
     $('#fab').hidden = false; $('#fab').onclick = function () { APP.tickets.ouvrir(); };
     document.addEventListener('focusin', function (e) { if (e.target.matches && e.target.matches('input:not([type=checkbox]):not([type=radio]),textarea,select')) document.body.classList.add('saisie-active'); });
