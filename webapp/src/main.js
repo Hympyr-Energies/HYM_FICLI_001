@@ -184,7 +184,8 @@
       });
     });
     $('#btn-theme').onclick = APP.theme.basculer; APP.theme.appliquer(APP.theme.courant(), false);
-    $('#btn-deco').onclick = function () { APP.confirmer({ titre: 'Se déconnecter ?', texte: 'Vos saisies sont déjà enregistrées dans la base commune.', ok: 'Se déconnecter' }).then(function (ok) { if (ok) APP.verrouiller(); }); };
+    // Retour à l'accueil du portail, session conservée : la déconnexion se fait au portail, pour tous les outils à la fois.
+    $('#btn-deco').onclick = function () { location.assign(APP.portail.url()); };
     $('#util').onclick = compte; $('#puce').onclick = actualiserMaintenant;
     $('#fab').hidden = false; $('#fab').onclick = function () { APP.tickets.ouvrir(); };
     document.addEventListener('focusin', function (e) { if (e.target.matches && e.target.matches('input:not([type=checkbox]):not([type=radio]),textarea,select')) document.body.classList.add('saisie-active'); });
