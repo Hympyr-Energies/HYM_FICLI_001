@@ -1,6 +1,6 @@
 # Cockpit appels · Hympyr Énergies (webapp)
 
-Refonte de l'outil Streamlit `app.py` en application web statique : un seul fichier `index.html`, sans serveur applicatif, branchée sur Supabase.
+Refonte de l'ancien outil Streamlit (`app.py`, retiré le 24/11/2026) en application web statique : un seul fichier `index.html`, sans serveur applicatif, branchée sur Supabase.
 Mêmes fonctionnalités et mêmes règles de calcul que l'ancien outil (vérifiées par des tests de parité sur les 9 638 clients réels), nouvelle interface.
 
 ## Ce que fait l'outil
@@ -27,10 +27,11 @@ Le classeur clients (feuilles « Clients » et « Adresses livraison » du fichi
 
 ```
 navigateur (index.html)  ──►  fonction Edge « fificli-api »  ──►  Supabase (Auth + Postgres)
-        aucune clé                 détient les clés                    comptes, tables, fonctions SQL
+   session du portail             détient les clés                    comptes, tables, fonctions SQL
 ```
 
-- La page ne contient **aucune clé Supabase**. Connexion, session (jeton renouvelé automatiquement) et données passent par la fonction `fificli-api`, qui valide le jeton, vérifie l'appartenance à `fificli_membres` et applique les droits du rôle.
+- **Connexion unique** : la page n'a plus d'écran de connexion. Elle lit la session supabase-js ouverte au portail Hympyr (même origine `hympyr-energies.github.io`, même clé de stockage) ; sans session, elle renvoie au portail avec `?retour=` et y revient une fois connecté. « Se déconnecter » ferme la session de tous les outils. Si la session est fermée ailleurs en cours de travail, un panneau masque les données et la saisie en cours est reprise après reconnexion.
+- La page contient seulement la clé **publishable** (publique par conception, la même que le portail). Les données passent toujours par la fonction `fificli-api`, qui valide le jeton, vérifie l'appartenance à `fificli_membres` et applique les droits du rôle ; les tables du cockpit n'ont aucun droit pour les rôles `anon` et `authenticated`.
 - Chaque enregistrement est une fonction SQL (une transaction) : fiche + version dans `historique` + ligne dans `appels`. Un champ laissé vide ne remplace jamais une information déjà saisie, sauf effacement demandé explicitement.
 - Les horodatages restent en UTC, comme l'existant ; l'affichage est en heure de Paris.
 - Le classeur est mis en cache dans le navigateur (IndexedDB) tant que sa version ne change pas ; le cache est vidé à la déconnexion.
@@ -59,7 +60,7 @@ python3 build.py --api-url https://cmvkijtlkzfwnzipgstc.supabase.co/functions/v1
 ```bash
 node tests/syntaxe.js                       # syntaxe des modules
 node tests/fonction.test.js                 # fonction Edge réelle contre un faux Supabase (16 groupes)
-python3 tests/generer_reference.py && node tests/parite.test.js   # parité avec l'ancien Python (11 groupes)
+node tests/parite.test.js                   # parité avec l'ancien Python, sur une référence figée (tests/reference.json, jeu synthétique)
 node tests/serveur_simule.js 8781           # faux serveur pour essayer l'interface (python3 build.py --api-url http://127.0.0.1:8781 --out dist-test/index.html)
 ```
 

@@ -28,6 +28,8 @@
 </head>
 <body>
 <!-- Configuration : API_URL = adresse de la fonction Supabase « fificli-api » (voir supabase/README.md). -->
+<!-- Connexion unique : session supabase-js partagée avec le portail (même version que le portail, la charte et le pilotage). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>window.HYM_CONFIG = {{CONFIG}};</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">{{LOGO_SYMBOLE}}</svg>
@@ -36,29 +38,12 @@
 <div class="porte" id="porte" hidden>
   <div class="porte-carte verre">
     <svg class="logo" role="img" aria-label="Hympyr Énergies"><use href="#logo"/></svg>
-    <form id="f-conn" novalidate>
-      <div><h1>Cockpit appels</h1><p>Accès réservé aux membres de l'équipe. Connectez-vous avec votre compte.</p></div>
-      <p class="porte-info" id="f-conn-info" role="status"></p>
-      <div class="champ"><label for="c-email">Adresse e-mail</label><input class="saisie" id="c-email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"></div>
-      <div class="champ"><label for="c-mdp">Mot de passe</label><input class="saisie" id="c-mdp" type="password" autocomplete="current-password"></div>
+    <div id="f-session" hidden>
+      <div><h1>Session fermée</h1><p>Votre connexion aux outils Hympyr a été fermée (déconnexion depuis le portail, un autre outil ou un autre appareil). Reconnectez-vous sur le portail : ce que vous avez saisi ici est conservé.</p></div>
       <p class="porte-erreur" role="alert"></p>
-      <button class="btn btn--main" id="c-ok" type="submit">Se connecter</button>
-      <button class="lien" id="c-oubli" type="button">Mot de passe oublié ?</button>
-    </form>
-    <form id="f-oubli" novalidate hidden>
-      <div><h1>Mot de passe oublié</h1><p>Saisissez l'adresse e-mail de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p></div>
-      <div class="champ"><label for="o-email">Adresse e-mail</label><input class="saisie" id="o-email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"></div>
-      <p class="porte-erreur" role="alert"></p>
-      <button class="btn btn--main" id="o-ok" type="submit">Envoyer le lien</button>
-      <button class="lien" id="o-retour" type="button">Retour à la connexion</button>
-    </form>
-    <form id="f-nouveau" novalidate hidden>
-      <div><h1>Nouveau mot de passe</h1><p>Choisissez un mot de passe d'au moins 10 caractères.</p></div>
-      <div class="champ"><label for="n-mdp">Nouveau mot de passe</label><input class="saisie" id="n-mdp" type="password" autocomplete="new-password"></div>
-      <div class="champ"><label for="n-mdp2">Confirmer</label><input class="saisie" id="n-mdp2" type="password" autocomplete="new-password"></div>
-      <p class="porte-erreur" role="alert"></p>
-      <button class="btn btn--main" id="n-ok" type="submit">Enregistrer</button>
-    </form>
+      <a class="btn btn--main" id="s-portail" href="https://hympyr-energies.github.io/portail/" target="_blank" rel="noopener">Se reconnecter sur le portail</a>
+      <button class="lien" id="s-reprendre" type="button">C'est fait : reprendre</button>
+    </div>
     <div id="f-charge" hidden>
       <div id="ch-etat" class="porte-charge"><span class="chargement" aria-hidden="true"></span><p id="ch-txt">Chargement des données de l'équipe…</p></div>
       <p class="porte-erreur" id="ch-err" role="alert"></p>

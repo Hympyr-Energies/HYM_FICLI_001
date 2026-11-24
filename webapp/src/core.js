@@ -172,36 +172,71 @@
   }
   APP.appelerFonction = appeler;
 
-  /* ------------------------------------------------------------------ session de membre */
-  var CLE_SESSION = 'hym.session.fificli', enRafraichissement = null;
-  function ecrireSession(r) {
-    var s = { access_token: r.access_token, refresh_token: r.refresh_token, expire: Date.now() + (r.expires_in || 3600) * 1000, email: r.email, nom: r.nom || '', role: r.role || '' };
-    try { localStorage.setItem(CLE_SESSION, JSON.stringify(s)); } catch (e) {}
-    return s;
-  }
+  /* ------------------------------------------------------------------ session commune des outils Hympyr (connexion unique par le portail) */
+  // Même client supabase-js, même origine (hympyr-energies.github.io) et même clé de stockage que le portail, la charte et le pilotage :
+  // une connexion au portail ouvre ce cockpit, « Se déconnecter » ici ferme tous les outils. La clé « publishable » est publique par
+  // conception ; les données restent derrière la fonction Edge, qui valide le jeton et vérifie l'appartenance à la table de membres.
+  var PORTAIL = CFG.PORTAIL_URL || 'https://hympyr-energies.github.io/portail/', SB = null, courante = null;
+  try {
+    if (window.supabase && CFG.SB_URL && CFG.SB_KEY) SB = window.supabase.createClient(CFG.SB_URL, CFG.SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+  } catch (e) { SB = null; }
+  function sansSession(message) { var e = new Error(message || 'Connexion requise.'); e.code = 'session'; return e; }
+  function retenir(s) { courante = s && s.access_token ? s : null; return courante; }
+  function sessionDe(r) { return retenir(r && r.data ? r.data.session : null); }
+  if (SB) SB.auth.onAuthStateChange(function (ev, s) {
+    retenir(s);
+    // Déconnexion depuis le portail, un autre outil ou un autre onglet : on masque aussitôt les données de l'écran.
+    if (ev === 'SIGNED_OUT' && APP.porte && APP.porte.demarre) APP.porte.ouvrir().then(APP.porte.fermer);
+  });
+
+  APP.portail = {
+    url: function (params) {
+      var u = new URL(PORTAIL);
+      Object.keys(params || {}).forEach(function (k) { if (params[k]) u.searchParams.set(k, params[k]); });
+      return u.href;
+    },
+    /** Pas de session : direction la page de connexion unique, qui ramène ici ensuite (?retour=…).
+        Garde-fou : si l'on revient du portail sans session depuis moins de 20 s, on s'arrête (évite une boucle de redirections). */
+    seConnecter: function () {
+      var dernier = 0, k = 'hym.redirection.' + (CFG.OUTIL || 'outil');
+      try { dernier = +sessionStorage.getItem(k) || 0; sessionStorage.setItem(k, String(Date.now())); } catch (e) {}
+      if (Date.now() - dernier < 20000) return false;
+      location.replace(APP.portail.url({ retour: location.href, outil: CFG.OUTIL }));
+      return true;
+    },
+    /** Compte connecté mais pas membre de ce cockpit : retour au portail, qui l'explique (sans fermer la session des autres outils). */
+    refuser: function () { location.replace(APP.portail.url({ outil: CFG.OUTIL, refus: '1' })); },
+    /** Ancien lien « mot de passe oublié » arrivé sur le cockpit : la saisie du nouveau mot de passe se fait au portail. */
+    recuperation: function () {
+      var h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+      if (h.get('type') !== 'recovery' || !h.get('access_token')) return false;
+      location.replace(PORTAIL + location.hash);
+      return true;
+    }
+  };
+
   APP.session = {
-    lire: function () { try { return JSON.parse(localStorage.getItem(CLE_SESSION) || 'null'); } catch (e) { return null; } },
-    effacer: function () { try { localStorage.removeItem(CLE_SESSION); } catch (e) {} },
-    active: function () { return !!APP.session.lire(); },
-    connexion: function (email, mdp) { return appeler('login', { email: email, password: mdp }).then(ecrireSession); },
-    recuperer: function (email) { return appeler('recover', { email: email }); },
-    /** Jeton valide : renouvelé automatiquement quand il approche de son expiration. */
+    disponible: function () { return !!SB; },
+    /** Lit la session commune (stockage partagé avec le portail) ; null si personne n'est connecté. */
+    demarrer: function () {
+      if (!SB) return Promise.reject(new Error('Service de connexion indisponible : vérifiez la connexion internet puis rechargez la page.'));
+      return SB.auth.getSession().then(sessionDe);
+    },
+    lire: function () { return courante && courante.user ? { email: courante.user.email, nom: '' } : null; },
+    utilisateur: function () { return APP.session.lire(); },
+    active: function () { return !!courante; },
+    /** Jeton valide : supabase-js le renouvelle automatiquement (un seul renouvellement à la fois entre onglets). */
     jeton: function () {
-      var s = APP.session.lire();
-      if (!s) { var e = new Error('Connexion requise.'); e.code = 'session'; return Promise.reject(e); }
-      if (Date.now() < s.expire - 90000) return Promise.resolve(s.access_token);
-      return APP.session.rafraichir().then(function (n) { return n.access_token; });
+      if (!SB) return Promise.reject(sansSession());
+      return SB.auth.getSession().then(function (r) { var s = sessionDe(r); if (!s) throw sansSession(); return s.access_token; });
     },
     rafraichir: function () {
-      var s = APP.session.lire();
-      if (!s) { var e = new Error('Connexion requise.'); e.code = 'session'; return Promise.reject(e); }
-      if (enRafraichissement) return enRafraichissement;
-      enRafraichissement = appeler('refresh', { refresh_token: s.refresh_token }).then(ecrireSession, function (err) {
-        if (err.code === 'auth' || err.code === 'membre') { APP.session.effacer(); err.code = 'session'; err.message = 'Session expirée : reconnectez-vous.'; }
-        throw err;
-      }).finally(function () { enRafraichissement = null; });
-      return enRafraichissement;
+      if (!SB) return Promise.reject(sansSession());
+      return SB.auth.refreshSession().then(function (r) { var s = sessionDe(r); if ((r && r.error) || !s) throw sansSession('Session expirée : reconnectez-vous.'); return s; });
     },
+    /** La session commune n'est jamais effacée sur une simple erreur : seul « Se déconnecter » la ferme (pour tous les outils). */
+    effacer: function () {},
+    fermer: function () { return SB ? SB.auth.signOut().then(function () {}, function () {}) : Promise.resolve(); },
     changerMotDePasse: function (mdp) { return APP.nuage('password', { password: mdp }); }
   };
   /** Appel authentifié : une session refusée est renouvelée une fois avant d'abandonner. */
@@ -209,7 +244,7 @@
     var essai = function (reprise) {
       return APP.session.jeton().then(function (j) { return appeler(action, corps, j, delai); }).catch(function (e) {
         if (e.code === 'auth' && !reprise) return APP.session.rafraichir().then(function () { return essai(true); });
-        if (e.code === 'auth') { APP.session.effacer(); e.code = 'session'; e.message = 'Session expirée : reconnectez-vous.'; }
+        if (e.code === 'auth') { e.code = 'session'; e.message = 'Session expirée : reconnectez-vous.'; }
         throw e;
       });
     };
@@ -222,7 +257,11 @@
       return APP.porte.ouvrir().then(function () { APP.porte.fermer(); return APP.nuage(action, corps, delai); });
     });
   };
-  APP.verrouiller = function () { APP.session.effacer(); if (APP.cache) APP.cache.vider().then(function () { location.reload(); }, function () { location.reload(); }); else location.reload(); };
+  /** Déconnexion : ferme la session commune (tous les outils Hympyr), vide le cache du classeur, retour à la page de connexion unique. */
+  APP.verrouiller = function () {
+    var portail = function () { location.replace(APP.portail.url()); };
+    APP.session.fermer().then(function () { return APP.cache ? APP.cache.vider() : null; }).then(portail, portail);
+  };
 
   /* ------------------------------------------------------------------ navigation : onglets selon le rôle, pastille qui glisse, transition sans saccade */
   var DEFINITION = {

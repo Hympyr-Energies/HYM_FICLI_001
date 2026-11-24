@@ -83,7 +83,7 @@ async function fauxFetch(url, init = {}) {
 
 /* ---------- chargement de la vraie fonction ---------- */
 let gestionnaire = null;
-const env = { SUPABASE_URL: URL_, SUPABASE_ANON_KEY: 'cle-anon', SUPABASE_SERVICE_ROLE_KEY: 'cle-serveur' };
+const env = { SUPABASE_URL: URL_, SUPABASE_ANON_KEY: 'cle-anon', SUPABASE_SERVICE_ROLE_KEY: 'cle-serveur', FIFICLI_ALLOWED_ORIGIN: 'http://127.0.0.1:8800/' };
 globalThis.Deno = { env: { get: (k) => env[k] }, serve: (f) => { gestionnaire = f; } };
 globalThis.fetch = fauxFetch;
 const appeler = async (corps, jeton, origine) => {
@@ -102,7 +102,13 @@ const connexion = async (email) => (await appeler({ action: 'login', email, pass
 
   await groupe('en-têtes CORS et requête OPTIONS', async () => {
     const r = await gestionnaire(new Request('https://f.test/x', { method: 'OPTIONS' }));
-    assert.strictEqual(r.status, 204); assert.strictEqual(r.headers.get('access-control-allow-origin'), 'https://quentindebrie-code.github.io');
+    assert.strictEqual(r.status, 204); assert.strictEqual(r.headers.get('access-control-allow-origin'), 'https://hympyr-energies.github.io');
+    const o = (origine) => gestionnaire(new Request('https://f.test/x', { method: 'OPTIONS', headers: { Origin: origine } })).then((x) => x.headers.get('access-control-allow-origin'));
+    assert.strictEqual(await o('https://hympyr-energies.github.io'), 'https://hympyr-energies.github.io');
+    assert.strictEqual(await o('http://127.0.0.1:8800'), 'http://127.0.0.1:8800', 'origine supplémentaire de la variable renvoyée telle quelle');
+    assert.strictEqual(await o('https://pirate.example'), 'https://hympyr-energies.github.io', 'origine inconnue : jamais renvoyée');
+    const p = await gestionnaire(new Request('https://f.test/x', { method: 'POST', headers: { Origin: 'http://127.0.0.1:8800' }, body: '{' }));
+    assert.strictEqual(p.headers.get('access-control-allow-origin'), 'http://127.0.0.1:8800', 'aussi sur les réponses JSON');
     assert.strictEqual((await gestionnaire(new Request('https://f.test/x', { method: 'GET' }))).status, 405);
   });
   await groupe('connexion : membre, non-membre, mauvais mot de passe, même message', async () => {
