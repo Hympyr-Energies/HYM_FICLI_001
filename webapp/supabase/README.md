@@ -8,7 +8,8 @@ Projet : `cmvkijtlkzfwnzipgstc`. Adresse de la fonction : `https://cmvkijtlkzfwn
 2. Fonction Edge `functions/fificli-api` (sans vérification JWT intégrée : elle valide elle-même le jeton du membre).
 3. Reprise du classeur clients existant dans `fificli_classeur`.
 
-Variables facultatives de la fonction (valeurs par défaut déjà correctes) : `FIFICLI_ALLOWED_ORIGIN` (origine autorisée, défaut `https://quentindebrie-code.github.io`) et `FIFICLI_SITE_URL` (adresse de la page, utilisée dans l'e-mail « mot de passe oublié »).
+Variables facultatives de la fonction (valeurs par défaut déjà correctes) : `FIFICLI_ALLOWED_ORIGIN` (origine autorisée, défaut `https://hympyr-energies.github.io`) et `FIFICLI_SITE_URL` (page des e-mails « mot de passe oublié », défaut : le portail).
+La page n'utilise plus les actions `login`, `refresh` et `recover` : la connexion se fait au portail. Elles restent dans la fonction, sans effet sur la sécurité, en attendant leur retrait.
 
 ## Ajouter un membre avec son e-mail et un mot de passe
 

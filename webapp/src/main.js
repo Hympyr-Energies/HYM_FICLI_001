@@ -18,85 +18,71 @@
   }
   APP.sur('synchro', puce);
 
-  /* ------------------------------------------------------------------ connexion des membres */
+  /* ------------------------------------------------------------------ accès : session commune ouverte au portail Hympyr */
   APP.porte = (function () {
-    var attente = null, termine = null, jetonRecuperation = null;
-    var formulaires = ['f-conn', 'f-oubli', 'f-nouveau', 'f-charge'];
-    function montrer(nom, info) {
+    var attente = null, termine = null, liees = false;
+    var formulaires = ['f-session', 'f-charge'];
+    function montrer(nom) {
       formulaires.forEach(function (id) { $('#' + id).hidden = id !== nom; });
       $$('.porte-erreur').forEach(function (e) { e.textContent = ''; });
-      var i = $('#' + nom + '-info'); if (i) i.textContent = info || '';
-      var champ = $('#' + nom + ' input'); if (champ && nom !== 'f-charge') setTimeout(function () { champ.focus(); }, 60);
     }
-    var messageErreur = function (e) { return e.code === 'auth' ? 'Identifiants incorrects.' : e.code === 'membre' ? 'Ce compte n\'est pas autorisé à utiliser le cockpit.' : e.message; };
+    /** Reprise sans recharger la page (saisies conservées) dès qu'une session est rouverte au portail, dans un autre onglet. */
+    function reprendre(manuel) {
+      if (!termine) return;
+      APP.session.jeton().then(function () { if (termine) termine(); }, function () {
+        if (manuel) $('#f-session .porte-erreur').textContent = 'Toujours aucune session : connectez-vous d\'abord sur le portail.';
+      });
+    }
     function lier() {
-      $('#f-conn').onsubmit = function (ev) {
-        ev.preventDefault();
-        var email = $('#c-email').value.trim(), mdp = $('#c-mdp').value, err = $('#f-conn .porte-erreur'), btn = $('#c-ok');
-        $('#c-email').setAttribute('aria-invalid', String(!email)); $('#c-mdp').setAttribute('aria-invalid', String(!mdp));
-        if (!email || !mdp) { err.textContent = 'Saisissez votre adresse e-mail et votre mot de passe.'; return; }
-        err.textContent = ''; APP.occupe(btn, 'Vérification…');
-        APP.session.connexion(email, mdp).then(function () { $('#c-mdp').value = ''; APP.libere(btn); if (termine) termine(); },
-          function (e) { APP.libere(btn); err.textContent = messageErreur(e); $('#c-mdp').setAttribute('aria-invalid', 'true'); $('#c-mdp').select(); });
-      };
-      $('#c-oubli').onclick = function () { $('#o-email').value = $('#c-email').value; montrer('f-oubli'); };
-      $('#o-retour').onclick = function () { montrer('f-conn'); };
-      $('#f-oubli').onsubmit = function (ev) {
-        ev.preventDefault();
-        var email = $('#o-email').value.trim(), btn = $('#o-ok'), err = $('#f-oubli .porte-erreur');
-        if (!/.+@.+/.test(email)) { err.textContent = 'Saisissez votre adresse e-mail.'; return; }
-        APP.occupe(btn, 'Envoi…');
-        APP.session.recuperer(email).then(function () { APP.libere(btn); montrer('f-conn', 'Si cette adresse correspond à un compte membre, un e-mail de réinitialisation vient d\'être envoyé.'); }, function (e) { APP.libere(btn); err.textContent = messageErreur(e); });
-      };
-      $('#f-nouveau').onsubmit = function (ev) {
-        ev.preventDefault();
-        var a = $('#n-mdp').value, b = $('#n-mdp2').value, err = $('#f-nouveau .porte-erreur'), btn = $('#n-ok');
-        if (a.length < 10) { err.textContent = 'Le mot de passe doit contenir au moins 10 caractères.'; return; }
-        if (a !== b) { err.textContent = 'Les deux mots de passe ne sont pas identiques.'; return; }
-        APP.occupe(btn, 'Enregistrement…');
-        APP.appelerFonction('password', { password: a }, jetonRecuperation).then(function () { APP.libere(btn); jetonRecuperation = null; $('#n-mdp').value = $('#n-mdp2').value = ''; montrer('f-conn', 'Mot de passe modifié. Connectez-vous avec le nouveau.'); },
-          function (e) { APP.libere(btn); err.textContent = e.code === 'auth' ? 'Le lien de réinitialisation a expiré : redemandez-en un.' : messageErreur(e); });
-      };
+      $('#s-portail').href = APP.portail.url();
+      $('#s-reprendre').onclick = function () { reprendre(true); };
+      window.addEventListener('focus', function () { reprendre(false); });
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) reprendre(false); });
     }
-    var liees = false;
+    function afficher() { if (!liees) { lier(); liees = true; } var porte = $('#porte'); porte.hidden = false; porte.classList.remove('sort'); }
     return {
-      ouvrir: function (opts) {
-        opts = opts || {};
-        if (!liees) { lier(); liees = true; }
-        if (opts.jeton) jetonRecuperation = opts.jeton;
+      demarre: false,
+      /** Session fermée en cours de travail : panneau « Session fermée » ; résout quand une session est de nouveau disponible. */
+      ouvrir: function () {
         if (attente) return attente;
-        var porte = $('#porte'); porte.hidden = false; porte.classList.remove('sort');
-        montrer(jetonRecuperation ? 'f-nouveau' : 'f-conn');
+        afficher(); montrer('f-session');
         attente = new Promise(function (res) { termine = res; }).then(function () { attente = null; termine = null; });
         return attente;
       },
       /** Panneau « chargement des données » (avec nouvel essai si la base est injoignable). */
       charge: function (fn) {
-        if (!liees) { lier(); liees = true; }
-        var porte = $('#porte'); porte.hidden = false; porte.classList.remove('sort');
+        afficher();
         var essai = function () {
           montrer('f-charge'); $('#ch-etat').hidden = false; $('#ch-err').textContent = ''; $('#ch-retour').hidden = true;
           return fn().then(function () { return true; }, function (e) {
             if (e.code === 'session') return APP.porte.ouvrir().then(essai);
+            if (e.code === 'membre') { APP.portail.refuser(); return new Promise(function () {}); }
             $('#ch-etat').hidden = true; $('#ch-err').textContent = 'Chargement impossible : ' + e.message; $('#ch-retour').hidden = false;
             return new Promise(function (r) { $('#ch-retour').onclick = function () { r(essai()); }; });
           });
         };
         return essai();
       },
-      fermer: function () { var p = $('#porte'); p.classList.add('sort'); setTimeout(function () { p.hidden = true; }, 600); },
-      recuperation: function () {
-        var h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
-        if (h.get('type') === 'recovery' && h.get('access_token')) { var j = h.get('access_token'); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} return j; }
-        return null;
-      }
+      /** Erreur bloquante au démarrage (service de connexion injoignable, boucle de redirection évitée). */
+      erreur: function (message) {
+        afficher(); montrer('f-charge'); $('#ch-etat').hidden = true; $('#ch-err').textContent = message;
+        $('#ch-retour').hidden = false; $('#ch-retour').onclick = function () { location.reload(); };
+      },
+      fermer: function () { var p = $('#porte'); p.classList.add('sort'); setTimeout(function () { p.hidden = true; }, 600); }
     };
   })();
 
-  function connexion() {
-    var rec = APP.porte.recuperation();
-    var identifie = rec ? APP.porte.ouvrir({ jeton: rec }) : (APP.session.active() ? APP.session.jeton().then(function () {}, function () { return APP.porte.ouvrir(); }) : APP.porte.ouvrir());
-    return identifie.then(function () { return APP.porte.charge(function () { return D.charger(); }); }).then(function () { APP.porte.fermer(); });
+  /** Démarrage : session commune présente -> chargement ; absente -> page de connexion unique (portail), qui ramène ici. */
+  function connexion(charger) {
+    var jamais = new Promise(function () {});
+    if (APP.portail.recuperation()) return jamais;
+    return APP.session.demarrer().then(function (s) {
+      if (!s) {
+        if (!APP.portail.seConnecter()) APP.porte.erreur('La connexion du portail n\'a pas été retrouvée sur cette page. Rechargez la page ou reconnectez-vous depuis le portail.');
+        return jamais;
+      }
+      return APP.porte.charge(charger).then(function () { APP.porte.demarre = true; APP.porte.fermer(); });
+    }, function (e) { APP.porte.erreur(e.message); return jamais; });
   }
 
   /* ------------------------------------------------------------------ visite guidée (reformulée, courte) */
@@ -217,7 +203,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     APP.theme.appliquer(APP.theme.courant(), false);
-    if (!window.HYM_CONFIG || !window.HYM_CONFIG.API_URL) { document.body.classList.add('pret'); $('#porte').hidden = false; $('#f-conn').hidden = true; $('#f-charge').hidden = false; $('#ch-etat').hidden = true; $('#ch-err').textContent = 'Adresse du service non configurée (voir README).'; return; }
-    connexion().then(demarrer);
+    if (!window.HYM_CONFIG || !window.HYM_CONFIG.API_URL) { document.body.classList.add('pret'); $('#porte').hidden = false; $('#f-charge').hidden = false; $('#ch-etat').hidden = true; $('#ch-err').textContent = 'Adresse du service non configurée (voir README).'; return; }
+    connexion(function () { return D.charger(); }).then(demarrer);
   });
 })();

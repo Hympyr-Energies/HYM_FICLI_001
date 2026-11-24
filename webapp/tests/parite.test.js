@@ -2,7 +2,9 @@
    Usage : python3 tests/generer_reference.py && node tests/parite.test.js */
 const fs = require('fs'), path = require('path'), assert = require('assert');
 const H = require('../src/logique.js');
-const chemin = path.join(__dirname, 'local', 'reference.json');
+// Référence figée sur un jeu synthétique (tests/reference.json), pour ne plus dépendre de l'ancien code Python.
+// Une référence sur le classeur réel (tests/local/, non versionné) reste prioritaire si elle existe.
+const local = path.join(__dirname, 'local', 'reference.json'), chemin = fs.existsSync(local) ? local : path.join(__dirname, 'reference.json');
 if (!fs.existsSync(chemin)) { console.error('Référence absente : lancez d\'abord python3 tests/generer_reference.py'); process.exit(2); }
 const R = JSON.parse(fs.readFileSync(chemin, 'utf8'));
 

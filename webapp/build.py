@@ -29,7 +29,17 @@ css = '\n'.join(css).replace('calc(var(--k)*1) solid', 'thin solid')
 api = ''
 if '--api-url' in sys.argv:
     api = sys.argv[sys.argv.index('--api-url') + 1]
-config = json.dumps({'API_URL': api}, ensure_ascii=False)
+def option(nom, defaut):
+    return sys.argv[sys.argv.index(nom) + 1] if nom in sys.argv else defaut
+
+
+# Session commune des outils Hympyr : même projet Supabase, même clé publique (« publishable », publique par conception)
+# et même origine que le portail. Jamais de clé secrète ici : les données restent derrière la fonction Edge.
+config = json.dumps({'API_URL': api,
+                     'SB_URL': option('--sb-url', 'https://cmvkijtlkzfwnzipgstc.supabase.co'),
+                     'SB_KEY': option('--sb-key', 'sb_publishable_Q8HVlAGCLlpF5P3Gqsa_9g_fKDDD0bZ'),
+                     'PORTAIL_URL': option('--portail-url', 'https://hympyr-energies.github.io/portail/'),
+                     'OUTIL': 'cockpit_appels'}, ensure_ascii=False)
 
 scripts = json.dumps(json.load(open(os.path.join(S, 'scripts.json'), encoding='utf-8')), ensure_ascii=False, separators=(',', ':'))
 modules = ['logique.js', 'core.js', 'ui.js', 'donnees.js', 'vue-synthese.js', 'vue-appels.js', 'vue-livraisons.js', 'vue-rappels.js', 'vue-pilotage.js', 'vue-export.js', 'tickets.js', 'main.js']
