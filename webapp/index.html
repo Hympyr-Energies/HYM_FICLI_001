@@ -485,6 +485,10 @@ body:not(.pret) .hd,body:not(.pret) .app,body:not(.pret) .basse,body:not(.pret) 
 .nav-fiche{display:flex;align-items:center;gap:var(--s3)}
 .pos{min-width:calc(var(--k)*76);text-align:center;font-size:var(--small);color:var(--txt2)}
 .pos b{font-size:calc(var(--k)*20);color:var(--txt);font-weight:700}
+.pos-saisie{width:calc(var(--k)*64);height:calc(var(--k)*34);padding:0 calc(var(--k)*4);text-align:center;font-size:calc(var(--k)*20);font-weight:700;color:var(--txt);background:transparent;border:var(--hair) solid transparent;border-radius:var(--r-md);cursor:text;transition:border-color .2s,background .2s}
+.pos-saisie:hover{border-color:var(--champ-bord)}
+.pos-saisie:focus{outline:0;background:var(--champ-focus);border-color:var(--vif);box-shadow:0 0 0 calc(var(--k)*3) rgba(40,203,136,.28)}
+.pos-saisie[aria-invalid="true"]{border-color:var(--err)}
 .acces-direct{display:flex;gap:var(--s2);align-items:center}
 .acces-direct .saisie{width:calc(var(--k)*190)}
 .chips-actifs{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s4)}.chips-actifs:empty{display:none}
@@ -1518,6 +1522,29 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
     if (!nom) return '<span class="tag tag--neutre">Non traité</span>';
     return '<span class="tag tag--personne" style="--c:' + APP.D.couleur(nom) + '"><i></i>' + esc(nom) + '</span>';
   };
+  /** Numéro de fiche saisissable dans la barre de navigation : on tape 150 puis Entrée pour ouvrir la 150e fiche de la file.
+   *  input : le champ ; total() : taille de la file ; aller(index0) : ouvre la fiche (la vue gère la confirmation de sortie). */
+  U.lierPosition = function (input, total, aller) {
+    var avant = '';
+    input.addEventListener('focus', function () { avant = input.value; input.select(); });
+    function valider() {
+      var n = total(), brut = input.value.replace(/\s/g, ''), v = parseInt(brut, 10);
+      if (!brut || brut === avant) { input.value = avant; return; }
+      if (!/^\d+$/.test(brut) || !n || v < 1 || v > n) {
+        input.value = avant; input.setAttribute('aria-invalid', 'true');
+        APP.toast(n ? 'Saisissez un numéro entre 1 et ' + APP.fmt.entier(n) + '.' : 'La file est vide.', 'err');
+        return;
+      }
+      input.setAttribute('aria-invalid', 'false'); avant = String(v); aller(v - 1);
+    }
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); valider(); input.blur(); }
+      else if (e.key === 'Escape') { e.preventDefault(); input.value = avant; input.blur(); }
+    });
+    input.addEventListener('change', valider);
+  };
+  /** Affiche la position courante sans écraser une saisie en cours. */
+  U.majPosition = function (input, pos) { if (document.activeElement !== input) input.value = pos >= 0 ? String(pos + 1) : ''; input.removeAttribute('aria-invalid'); };
   U.tag = function (texte, ton) { return '<span class="tag' + (ton ? ' tag--' + ton : '') + '">' + esc(texte) + '</span>'; };
   U.progres = function (pct) { return '<div class="progres" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></div>'; };
   U.anneau = function (pct, centre, sous) {
@@ -1914,7 +1941,7 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
     var p = $('#p-appels');
     p.innerHTML = U.titre('Appels', 'Une fiche à la fois, dans l\'ordre de la file. Les filtres décident de ce qui s\'affiche.') +
       '<div class="barre-file verre" id="a-barre">' +
-      '<div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Fiche précédente" aria-keyshortcuts="Alt+ArrowLeft">' + icon('gauche') + '</button><div class="pos" aria-live="polite"><b class="num" id="a-pos">–</b><span id="a-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Fiche suivante" aria-keyshortcuts="Alt+ArrowRight">' + icon('droite') + '</button></div>' +
+      '<div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Fiche précédente" aria-keyshortcuts="Alt+ArrowLeft">' + icon('gauche') + '</button><div class="pos" aria-live="polite"><input class="num pos-saisie" id="a-pos" inputmode="numeric" autocomplete="off" placeholder="–" aria-label="Numéro de la fiche dans la file : saisissez-le puis Entrée" title="Saisissez un numéro puis Entrée"><span id="a-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Fiche suivante" aria-keyshortcuts="Alt+ArrowRight">' + icon('droite') + '</button></div>' +
       '<label class="recherche">' + icon('loupe') + '<input class="saisie" id="a-rech" type="search" placeholder="Rechercher un nom, un code ou une ville" aria-label="Rechercher dans la file" autocomplete="off"></label>' +
       '<button class="btn btn--ghost" type="button" data-filtres>' + icon('filtre') + 'Filtres<span class="badge" id="a-badge" hidden></span></button>' +
       '<form class="acces-direct" id="a-direct" autocomplete="off"><input class="saisie" id="a-code" placeholder="Code client exact" aria-label="Accès direct par code client"><button class="btn btn--ghost btn--s" type="submit">Ouvrir</button></form></div>' +
@@ -1927,6 +1954,7 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
       if (!f) { APP.toast('Aucun client avec le code « ' + champ.value.trim() + ' ».', 'err'); champ.setAttribute('aria-invalid', 'true'); return; }
       champ.setAttribute('aria-invalid', 'false'); champ.value = ''; confirmerSortie().then(function (ok) { if (ok) { E.saut = f._code; E.jour = ''; V.majFile(true); } });
     });
+    U.lierPosition($('#a-pos', p), function () { return E.file.length; }, allerA);
     p.addEventListener('click', clicEcran);
     p.addEventListener('input', saisieEcran);
     p.addEventListener('change', saisieEcran);
@@ -1954,7 +1982,7 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
   };
   function majBarre() {
     var pos = position(), n = E.file.length;
-    $('#a-pos').textContent = pos >= 0 ? pos + 1 : '–'; $('#a-tot').textContent = ' / ' + APP.fmt.entier(n);
+    U.majPosition($('#a-pos'), pos); $('#a-tot').textContent = ' / ' + APP.fmt.entier(n);
     var prec = $('[data-nav="-1"]'), suiv = $('[data-nav="1"]');
     prec.disabled = !(n && (pos > 0 || (pos < 0 && E.idx > 0))); suiv.disabled = !(n && (pos < n - 1));
     var actifs = (E.f.traitement.length ? 1 : 0) + (E.f.statuts.length ? 1 : 0) + (E.f.types.length ? 1 : 0) + (E.f.aCompleter ? 1 : 0);
@@ -2003,6 +2031,12 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
     var cible = pos < 0 ? Math.max(0, Math.min(n - 1, E.idx + (pas > 0 ? 0 : -1))) : pos + pas;
     if (cible < 0 || cible > n - 1) return;
     confirmerSortie().then(function (ok) { if (!ok) return; E.sale = false; E.code = E.file[cible]._code; majBarre(); afficherFiche(); });
+  }
+  /** Ouvre directement la fiche n° (index + 1) de la file, saisie dans la barre de navigation. */
+  function allerA(index) {
+    var cible = E.file[index]; if (!cible) return;
+    if (cible._code === E.code) { majBarre(); return; }
+    confirmerSortie().then(function (ok) { if (!ok) { majBarre(); return; } E.sale = false; E.code = cible._code; majBarre(); afficherFiche(); });
   }
   function codeSuivant() {
     var pos = position(); if (pos < 0) return E.file.length ? E.file[Math.min(E.idx, E.file.length - 1)]._code : '';
@@ -2291,12 +2325,13 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
     var p = $('#p-livraisons');
     p.innerHTML = U.titre('Livraisons', 'Prolongement de l\'appel : pour chaque site livré, qui est le référent sur place ?') +
       '<div id="l-tuiles" class="tuiles tuiles--3"></div>' +
-      '<div class="barre-file verre" id="l-barre"><div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Point précédent">' + icon('gauche') + '</button><div class="pos"><b class="num" id="l-pos">–</b><span id="l-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Point suivant">' + icon('droite') + '</button></div>' +
+      '<div class="barre-file verre" id="l-barre"><div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Point précédent">' + icon('gauche') + '</button><div class="pos"><input class="num pos-saisie" id="l-pos" inputmode="numeric" autocomplete="off" placeholder="–" aria-label="Numéro du point dans la file : saisissez-le puis Entrée" title="Saisissez un numéro puis Entrée"><span id="l-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Point suivant">' + icon('droite') + '</button></div>' +
       '<label class="recherche">' + icon('loupe') + '<input class="saisie" id="l-adr" type="search" placeholder="Code adresse exact, par exemple 12771L56" aria-label="Code adresse exact" autocomplete="off"></label>' +
       '<label class="recherche">' + icon('building') + '<input class="saisie" id="l-mere" type="search" placeholder="Code client mère : tous ses points" aria-label="Code client mère" autocomplete="off"></label></div>' +
       '<div id="l-filtres" class="filtres-ligne"></div><div id="l-zone" class="appels-zone"></div>';
     var rafraichir = APP.debounce(function () { E.qAdr = $('#l-adr').value; E.qMere = $('#l-mere').value; V.majFile(); filtres(); }, 250);
     $('#l-adr', p).addEventListener('input', rafraichir); $('#l-mere', p).addEventListener('input', rafraichir);
+    U.lierPosition($('#l-pos', p), function () { return E.file.length; }, allerA);
     p.addEventListener('click', clic); p.addEventListener('input', saisie); p.addEventListener('change', saisie);
     p.addEventListener('submit', function (e) { if (e.target.id === 'l-form') { e.preventDefault(); enregistrer(); } });
     p.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && $('#l-form')) { e.preventDefault(); enregistrer(); } });
@@ -2318,7 +2353,7 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
     if (pos < 0 && !(E.code && (E.sale || garder === 'garder'))) { var c = E.file.length ? E.file[Math.min(E.idx, E.file.length - 1)] : null; E.code = c ? c.code : ''; }
     pos = position(); if (pos >= 0) E.idx = pos;
     var n = E.file.length;
-    $('#l-pos').textContent = pos >= 0 ? pos + 1 : '–'; $('#l-tot').textContent = ' / ' + APP.fmt.entier(n);
+    U.majPosition($('#l-pos'), pos); $('#l-tot').textContent = ' / ' + APP.fmt.entier(n);
     $('[data-nav="-1"]', $('#l-barre')).disabled = !(n && pos > 0); $('[data-nav="1"]', $('#l-barre')).disabled = !(n && pos < n - 1);
     tuiles();
     if (E.code !== E.affiche) afficher(); else verrou();
@@ -2360,6 +2395,14 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
     var go = function () { E.sale = false; E.code = E.file[c].code; V.majFile('garder'); };
     if (!E.sale) return go();
     APP.confirmer({ titre: 'Modifications non enregistrées', texte: 'Les saisies de ce point de livraison ne sont pas enregistrées. Les abandonner ?', ok: 'Abandonner', non: 'Rester', danger: true }).then(function (ok) { if (ok) go(); });
+  }
+  /** Ouvre directement le point n° (index + 1) de la file, saisi dans la barre de navigation. */
+  function allerA(index) {
+    var cible = E.file[index]; if (!cible) return;
+    var go = function () { E.sale = false; E.code = cible.code; V.majFile('garder'); };
+    if (cible.code === E.code) return V.majFile('garder');
+    if (!E.sale) return go();
+    APP.confirmer({ titre: 'Modifications non enregistrées', texte: 'Les saisies de ce point de livraison ne sont pas enregistrées. Les abandonner ?', ok: 'Abandonner', non: 'Rester', danger: true }).then(function (ok) { if (ok) go(); else V.majFile('garder'); });
   }
   function enregistrer() {
     if (E.occupe || !E.affiche) return;
@@ -2889,7 +2932,7 @@ window.HYM_SCRIPTS = {"ordre":["particulier","pro","collectivite"],"scripts":{"p
   var VISITE = {
     commercial: [
       ['Synthèse', 'L\'écran d\'accueil rassemble vos chiffres du jour, les rappels à passer, l\'avancement de l\'équipe et l\'objectif du 1er septembre 2027.'],
-      ['Appels', 'Une fiche à la fois. Le filtre « Non traité » vous évite d\'appeler un client déjà pris par une collègue. Un bandeau signale quand quelqu\'un consulte la même fiche que vous.'],
+      ['Appels', 'Une fiche à la fois. Le filtre « Non traité » vous évite d\'appeler un client déjà pris par une collègue. Un bandeau signale quand quelqu\'un consulte la même fiche que vous. Pour sauter à une fiche, tapez son numéro dans le compteur puis Entrée.'],
       ['Script d\'appel', 'Le bouton Script ouvre le déroulé de l\'appel et les réponses aux objections. Le type de client est déduit de la fiche et reste modifiable. La recherche ouvre directement la bonne objection.'],
       ['Enregistrer', 'Renseignez le résultat de l\'appel puis enregistrez : la fiche suivante s\'ouvre (Ctrl + Entrée au clavier). Un champ laissé vide ne remplace jamais une information déjà saisie.'],
       ['Livraisons et rappels', 'Pour chaque site livré, notez le référent sur place. Le calendrier des rappels regroupe vos clients à recontacter, par jour.'],

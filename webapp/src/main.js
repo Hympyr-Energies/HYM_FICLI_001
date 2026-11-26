@@ -89,7 +89,7 @@
   var VISITE = {
     commercial: [
       ['Synthèse', 'L\'écran d\'accueil rassemble vos chiffres du jour, les rappels à passer, l\'avancement de l\'équipe et l\'objectif du 1er septembre 2027.'],
-      ['Appels', 'Une fiche à la fois. Le filtre « Non traité » vous évite d\'appeler un client déjà pris par une collègue. Un bandeau signale quand quelqu\'un consulte la même fiche que vous.'],
+      ['Appels', 'Une fiche à la fois. Le filtre « Non traité » vous évite d\'appeler un client déjà pris par une collègue. Un bandeau signale quand quelqu\'un consulte la même fiche que vous. Pour sauter à une fiche, tapez son numéro dans le compteur puis Entrée.'],
       ['Script d\'appel', 'Le bouton Script ouvre le déroulé de l\'appel et les réponses aux objections. Le type de client est déduit de la fiche et reste modifiable. La recherche ouvre directement la bonne objection.'],
       ['Enregistrer', 'Renseignez le résultat de l\'appel puis enregistrez : la fiche suivante s\'ouvre (Ctrl + Entrée au clavier). Un champ laissé vide ne remplace jamais une information déjà saisie.'],
       ['Livraisons et rappels', 'Pour chaque site livré, notez le référent sur place. Le calendrier des rappels regroupe vos clients à recontacter, par jour.'],
