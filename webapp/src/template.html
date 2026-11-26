@@ -10,6 +10,35 @@
 <title>Cockpit appels · Hympyr Énergies</title>
 <link rel="icon" href="{{FAVICON}}">
 <script>
+/* Nom affiché de l'outil : renommable par un administrateur du portail (Administration > Outils).
+   Lu sans connexion par la fonction publique portail_nom_outil() (elle ne renvoie que ce nom).
+   Le dernier nom connu est gardé dans le navigateur pour l'afficher dès l'ouverture, sans clignement.
+   Usage : <span data-nom-outil>…</span> dans la page, window.HYM_NOM_OUTIL() dans le code. */
+(function () {
+  var SLUG = 'cockpit_appels', DEFAUT = 'Cockpit appels', SUFFIXE = ' · Hympyr Énergies';
+  var SB_URL = 'https://cmvkijtlkzfwnzipgstc.supabase.co', SB_KEY = 'sb_publishable_Q8HVlAGCLlpF5P3Gqsa_9g_fKDDD0bZ'; // clé publique par conception
+  var CLE = 'hym.nom-outil.' + SLUG, nom = DEFAUT;
+  try { nom = localStorage.getItem(CLE) || DEFAUT; } catch (e) {}
+  function appliquer() {
+    document.title = nom + SUFFIXE;
+    var l = document.querySelectorAll('[data-nom-outil]');
+    for (var i = 0; i < l.length; i++) l[i].textContent = nom;
+  }
+  window.HYM_NOM_OUTIL = function () { return nom; };
+  document.title = nom + SUFFIXE;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', appliquer); else appliquer();
+  if (!window.fetch) return;
+  fetch(SB_URL + '/rest/v1/rpc/portail_nom_outil', {
+    method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_slug: SLUG })
+  }).then(function (r) { return r.ok ? r.json() : null; }).then(function (n) {
+    if (typeof n !== 'string' || !n.trim() || n === nom) return;
+    nom = n.trim();
+    try { localStorage.setItem(CLE, nom); } catch (e) {}
+    if (document.readyState !== 'loading') appliquer();
+  }).catch(function () { /* hors ligne ou script SQL pas encore exécuté : on garde le nom connu */ });
+})();
+</script>
+<script>
 /* Thème appliqué avant le premier affichage : choix mémorisé, sinon réglage du système. */
 (function () {
   var t = null;
@@ -71,7 +100,7 @@
     <section class="panneau" id="p-rappels" role="tabpanel" aria-label="Rappels"></section>
     <section class="panneau" id="p-export" role="tabpanel" aria-label="Export"></section>
     <section class="panneau" id="p-pilotage" role="tabpanel" aria-label="Pilotage"></section>
-    <p class="pied">Hympyr Énergies · Cockpit appels · Données clients à usage interne, ne pas diffuser.</p>
+    <p class="pied">Hympyr Énergies · <span data-nom-outil>Cockpit appels</span> · Données clients à usage interne, ne pas diffuser.</p>
   </div>
 </main>
 

@@ -152,7 +152,7 @@
       '<p class="aide">Les comptes et les mots de passe sont administrés dans Supabase par l\'administrateur de l\'équipe.</p></section>' +
       '<section><h3 class="etiquette">Données</h3><p class="aide">Classeur clients : <b>' + esc(D.classeurNom || 'non importé') + '</b>' + (maj ? ' · importé le ' + esc(maj) : '') + '<br>' + APP.fmt.entier(D.clients.length) + ' clients · ' + APP.fmt.entier(D.adresses.length) + ' points de livraison · ' + APP.fmt.entier(D.suivi.size) + ' fiches suivies.</p>' +
       '<div class="actions"><button class="btn btn--ghost btn--s" type="button" data-actu>' + icon('refresh') + 'Actualiser maintenant</button></div></section>' +
-      '<p class="aide">Cockpit appels ' + APP.VERSION + ' · Hympyr Énergies</p></div>', { classe: 'dlg-tiroir' });
+      '<p class="aide">' + esc(window.HYM_NOM_OUTIL ? HYM_NOM_OUTIL() : 'Cockpit appels') + ' ' + APP.VERSION + ' · Hympyr Énergies</p></div>', { classe: 'dlg-tiroir' });
     var el = f.el;
     $('[data-fermer]', el).onclick = f.fermer;
     $('[data-mdp]', el).onclick = function () { f.fermer(); nouveauMotDePasse(); };
