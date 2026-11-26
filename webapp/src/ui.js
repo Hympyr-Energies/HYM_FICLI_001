@@ -23,6 +23,29 @@
     if (!nom) return '<span class="tag tag--neutre">Non traité</span>';
     return '<span class="tag tag--personne" style="--c:' + APP.D.couleur(nom) + '"><i></i>' + esc(nom) + '</span>';
   };
+  /** Numéro de fiche saisissable dans la barre de navigation : on tape 150 puis Entrée pour ouvrir la 150e fiche de la file.
+   *  input : le champ ; total() : taille de la file ; aller(index0) : ouvre la fiche (la vue gère la confirmation de sortie). */
+  U.lierPosition = function (input, total, aller) {
+    var avant = '';
+    input.addEventListener('focus', function () { avant = input.value; input.select(); });
+    function valider() {
+      var n = total(), brut = input.value.replace(/\s/g, ''), v = parseInt(brut, 10);
+      if (!brut || brut === avant) { input.value = avant; return; }
+      if (!/^\d+$/.test(brut) || !n || v < 1 || v > n) {
+        input.value = avant; input.setAttribute('aria-invalid', 'true');
+        APP.toast(n ? 'Saisissez un numéro entre 1 et ' + APP.fmt.entier(n) + '.' : 'La file est vide.', 'err');
+        return;
+      }
+      input.setAttribute('aria-invalid', 'false'); avant = String(v); aller(v - 1);
+    }
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); valider(); input.blur(); }
+      else if (e.key === 'Escape') { e.preventDefault(); input.value = avant; input.blur(); }
+    });
+    input.addEventListener('change', valider);
+  };
+  /** Affiche la position courante sans écraser une saisie en cours. */
+  U.majPosition = function (input, pos) { if (document.activeElement !== input) input.value = pos >= 0 ? String(pos + 1) : ''; input.removeAttribute('aria-invalid'); };
   U.tag = function (texte, ton) { return '<span class="tag' + (ton ? ' tag--' + ton : '') + '">' + esc(texte) + '</span>'; };
   U.progres = function (pct) { return '<div class="progres" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></div>'; };
   U.anneau = function (pct, centre, sous) {

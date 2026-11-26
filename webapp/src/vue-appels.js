@@ -30,7 +30,7 @@
     var p = $('#p-appels');
     p.innerHTML = U.titre('Appels', 'Une fiche à la fois, dans l\'ordre de la file. Les filtres décident de ce qui s\'affiche.') +
       '<div class="barre-file verre" id="a-barre">' +
-      '<div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Fiche précédente" aria-keyshortcuts="Alt+ArrowLeft">' + icon('gauche') + '</button><div class="pos" aria-live="polite"><b class="num" id="a-pos">–</b><span id="a-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Fiche suivante" aria-keyshortcuts="Alt+ArrowRight">' + icon('droite') + '</button></div>' +
+      '<div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Fiche précédente" aria-keyshortcuts="Alt+ArrowLeft">' + icon('gauche') + '</button><div class="pos" aria-live="polite"><input class="num pos-saisie" id="a-pos" inputmode="numeric" autocomplete="off" placeholder="–" aria-label="Numéro de la fiche dans la file : saisissez-le puis Entrée" title="Saisissez un numéro puis Entrée"><span id="a-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Fiche suivante" aria-keyshortcuts="Alt+ArrowRight">' + icon('droite') + '</button></div>' +
       '<label class="recherche">' + icon('loupe') + '<input class="saisie" id="a-rech" type="search" placeholder="Rechercher un nom, un code ou une ville" aria-label="Rechercher dans la file" autocomplete="off"></label>' +
       '<button class="btn btn--ghost" type="button" data-filtres>' + icon('filtre') + 'Filtres<span class="badge" id="a-badge" hidden></span></button>' +
       '<form class="acces-direct" id="a-direct" autocomplete="off"><input class="saisie" id="a-code" placeholder="Code client exact" aria-label="Accès direct par code client"><button class="btn btn--ghost btn--s" type="submit">Ouvrir</button></form></div>' +
@@ -43,6 +43,7 @@
       if (!f) { APP.toast('Aucun client avec le code « ' + champ.value.trim() + ' ».', 'err'); champ.setAttribute('aria-invalid', 'true'); return; }
       champ.setAttribute('aria-invalid', 'false'); champ.value = ''; confirmerSortie().then(function (ok) { if (ok) { E.saut = f._code; E.jour = ''; V.majFile(true); } });
     });
+    U.lierPosition($('#a-pos', p), function () { return E.file.length; }, allerA);
     p.addEventListener('click', clicEcran);
     p.addEventListener('input', saisieEcran);
     p.addEventListener('change', saisieEcran);
@@ -70,7 +71,7 @@
   };
   function majBarre() {
     var pos = position(), n = E.file.length;
-    $('#a-pos').textContent = pos >= 0 ? pos + 1 : '–'; $('#a-tot').textContent = ' / ' + APP.fmt.entier(n);
+    U.majPosition($('#a-pos'), pos); $('#a-tot').textContent = ' / ' + APP.fmt.entier(n);
     var prec = $('[data-nav="-1"]'), suiv = $('[data-nav="1"]');
     prec.disabled = !(n && (pos > 0 || (pos < 0 && E.idx > 0))); suiv.disabled = !(n && (pos < n - 1));
     var actifs = (E.f.traitement.length ? 1 : 0) + (E.f.statuts.length ? 1 : 0) + (E.f.types.length ? 1 : 0) + (E.f.aCompleter ? 1 : 0);
@@ -119,6 +120,12 @@
     var cible = pos < 0 ? Math.max(0, Math.min(n - 1, E.idx + (pas > 0 ? 0 : -1))) : pos + pas;
     if (cible < 0 || cible > n - 1) return;
     confirmerSortie().then(function (ok) { if (!ok) return; E.sale = false; E.code = E.file[cible]._code; majBarre(); afficherFiche(); });
+  }
+  /** Ouvre directement la fiche n° (index + 1) de la file, saisie dans la barre de navigation. */
+  function allerA(index) {
+    var cible = E.file[index]; if (!cible) return;
+    if (cible._code === E.code) { majBarre(); return; }
+    confirmerSortie().then(function (ok) { if (!ok) { majBarre(); return; } E.sale = false; E.code = cible._code; majBarre(); afficherFiche(); });
   }
   function codeSuivant() {
     var pos = position(); if (pos < 0) return E.file.length ? E.file[Math.min(E.idx, E.file.length - 1)]._code : '';

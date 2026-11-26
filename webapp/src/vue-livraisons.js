@@ -26,12 +26,13 @@
     var p = $('#p-livraisons');
     p.innerHTML = U.titre('Livraisons', 'Prolongement de l\'appel : pour chaque site livré, qui est le référent sur place ?') +
       '<div id="l-tuiles" class="tuiles tuiles--3"></div>' +
-      '<div class="barre-file verre" id="l-barre"><div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Point précédent">' + icon('gauche') + '</button><div class="pos"><b class="num" id="l-pos">–</b><span id="l-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Point suivant">' + icon('droite') + '</button></div>' +
+      '<div class="barre-file verre" id="l-barre"><div class="nav-fiche"><button class="icone-btn" type="button" data-nav="-1" aria-label="Point précédent">' + icon('gauche') + '</button><div class="pos"><input class="num pos-saisie" id="l-pos" inputmode="numeric" autocomplete="off" placeholder="–" aria-label="Numéro du point dans la file : saisissez-le puis Entrée" title="Saisissez un numéro puis Entrée"><span id="l-tot"></span></div><button class="icone-btn" type="button" data-nav="1" aria-label="Point suivant">' + icon('droite') + '</button></div>' +
       '<label class="recherche">' + icon('loupe') + '<input class="saisie" id="l-adr" type="search" placeholder="Code adresse exact, par exemple 12771L56" aria-label="Code adresse exact" autocomplete="off"></label>' +
       '<label class="recherche">' + icon('building') + '<input class="saisie" id="l-mere" type="search" placeholder="Code client mère : tous ses points" aria-label="Code client mère" autocomplete="off"></label></div>' +
       '<div id="l-filtres" class="filtres-ligne"></div><div id="l-zone" class="appels-zone"></div>';
     var rafraichir = APP.debounce(function () { E.qAdr = $('#l-adr').value; E.qMere = $('#l-mere').value; V.majFile(); filtres(); }, 250);
     $('#l-adr', p).addEventListener('input', rafraichir); $('#l-mere', p).addEventListener('input', rafraichir);
+    U.lierPosition($('#l-pos', p), function () { return E.file.length; }, allerA);
     p.addEventListener('click', clic); p.addEventListener('input', saisie); p.addEventListener('change', saisie);
     p.addEventListener('submit', function (e) { if (e.target.id === 'l-form') { e.preventDefault(); enregistrer(); } });
     p.addEventListener('keydown', function (e) { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && $('#l-form')) { e.preventDefault(); enregistrer(); } });
@@ -53,7 +54,7 @@
     if (pos < 0 && !(E.code && (E.sale || garder === 'garder'))) { var c = E.file.length ? E.file[Math.min(E.idx, E.file.length - 1)] : null; E.code = c ? c.code : ''; }
     pos = position(); if (pos >= 0) E.idx = pos;
     var n = E.file.length;
-    $('#l-pos').textContent = pos >= 0 ? pos + 1 : '–'; $('#l-tot').textContent = ' / ' + APP.fmt.entier(n);
+    U.majPosition($('#l-pos'), pos); $('#l-tot').textContent = ' / ' + APP.fmt.entier(n);
     $('[data-nav="-1"]', $('#l-barre')).disabled = !(n && pos > 0); $('[data-nav="1"]', $('#l-barre')).disabled = !(n && pos < n - 1);
     tuiles();
     if (E.code !== E.affiche) afficher(); else verrou();
@@ -95,6 +96,14 @@
     var go = function () { E.sale = false; E.code = E.file[c].code; V.majFile('garder'); };
     if (!E.sale) return go();
     APP.confirmer({ titre: 'Modifications non enregistrées', texte: 'Les saisies de ce point de livraison ne sont pas enregistrées. Les abandonner ?', ok: 'Abandonner', non: 'Rester', danger: true }).then(function (ok) { if (ok) go(); });
+  }
+  /** Ouvre directement le point n° (index + 1) de la file, saisi dans la barre de navigation. */
+  function allerA(index) {
+    var cible = E.file[index]; if (!cible) return;
+    var go = function () { E.sale = false; E.code = cible.code; V.majFile('garder'); };
+    if (cible.code === E.code) return V.majFile('garder');
+    if (!E.sale) return go();
+    APP.confirmer({ titre: 'Modifications non enregistrées', texte: 'Les saisies de ce point de livraison ne sont pas enregistrées. Les abandonner ?', ok: 'Abandonner', non: 'Rester', danger: true }).then(function (ok) { if (ok) go(); else V.majFile('garder'); });
   }
   function enregistrer() {
     if (E.occupe || !E.affiche) return;
