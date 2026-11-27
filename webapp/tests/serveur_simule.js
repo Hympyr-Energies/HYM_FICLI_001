@@ -126,6 +126,21 @@ http.createServer((req, res) => {
         appels.push({ id: appels.length + 1, horodatage: r.maj_le, jour: r.maj_le.slice(0, 10), utilisateur: m.nom, type_fiche: 'client', code, statut: c.statut, origine: 'reattribution' });
         return rep(200, { fiche: r });
       }
+      case 'rappels_reprogrammer': {
+        // même règle que fificli_reprogrammer_rappels (sql/18) : commerciale = ses rappels, admin = tous ; date du jour d'origine vérifiée
+        if (!traite) return interdit();
+        const auj = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }), vers = String(c.vers || '');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(vers) || vers < auj) return refus(400, 'requete', 'La nouvelle date ne peut pas être dans le passé.');
+        const fiches = [], ignores = [];
+        (c.codes || []).forEach((code) => {
+          const r = suivi.get(String(code)), d = r && String(r.rappel_date || '').slice(0, 10);
+          const ok = r && r.statut === 'À rappeler' && (m.role === 'admin' || r.traite_par === m.nom) && (c.de === null ? d < auj : d === c.de);
+          if (!ok) { ignores.push(String(code)); return; }
+          const n = Object.assign({}, r, { rappel_date: vers, maj_le: maintenant() }); suivi.set(String(code), n); fiches.push(n);
+        });
+        if (fiches.length) journal.unshift({ horodatage: maintenant(), auteur: m.nom, action: 'Reprogrammation de rappels', cible: fiches.length + ' fiche(s)', detail: 'rappels ' + (c.de === null ? 'en retard' : 'du ' + c.de) + ' → ' + vers });
+        return rep(200, { fiches, ignores, serveur_le: maintenant() });
+      }
       case 'presence': if (!traite) return interdit(); verrous.push({ type_fiche: c.type, code: String(c.code), utilisateur: m.nom, depuis: maintenant() }); meta['derniere_fiche_' + m.nom] = String(c.code); return rep(200, { ok: true });
       case 'export_confirmer': if (!traite) return interdit(); meta.dernier_export = maintenant(); return rep(200, { dernier_export: meta.dernier_export });
       case 'rapport': { if (!pilote) return interdit(); const j = Math.max(1, Math.min(Number(c.jours) || 30, 365)), depuis = new Date(Date.now() - (j - 1) * 86400000).toISOString().slice(0, 10); return rep(200, { depuis, appels: appels.filter((a) => a.jour >= depuis), journal: journal.slice(0, 200) }); }
