@@ -104,10 +104,14 @@
   };
 
   /** Une ligne de rappel : client, ville, téléphone, retard, bouton d'ouverture. */
-  U.ligneRappel = function (r, avecBouton) {
-    var f = r.fiche, aujourdhui = H.aujourdhui(), ret = H.joursEntre(r.date, aujourdhui);
+  /** opts.coche : true / false ajoute une case de sélection (reprogrammation en lot) ; absent = pas de case. */
+  U.ligneRappel = function (r, avecBouton, opts) {
+    opts = opts || {};
+    var f = r.fiche, aujourdhui = H.aujourdhui(), ret = H.joursEntre(r.date, aujourdhui), avecCase = typeof opts.coche === 'boolean';
     var quand = r.date > aujourdhui ? 'le ' + H.jolieDate(r.date) : ret === 0 ? 'aujourd\'hui' : 'en retard de ' + ret + ' jour' + (ret > 1 ? 's' : '');
-    return '<li class="rappel' + (ret > 0 ? ' en-retard' : '') + '"><div class="rappel-corps"><b>' + esc(f['Raison sociale / Nom']) + '</b><span>' + esc(f.Ville || '') + (f['Téléphone 1'] ? ' · <a href="tel:' + esc(APP.tel(f['Téléphone 1'])) + '">' + esc(f['Téléphone 1']) + '</a>' : '') + '</span>' +
+    return '<li class="rappel' + (ret > 0 ? ' en-retard' : '') + (avecCase ? ' rappel--case' + (opts.coche ? ' coche' : '') : '') + '">' +
+      (avecCase ? '<input type="checkbox" class="rappel-case" data-coche="' + esc(f._code) + '"' + (opts.coche ? ' checked' : '') + ' aria-label="Sélectionner ' + esc(f['Raison sociale / Nom'] || f._code) + '">' : '') +
+      '<div class="rappel-corps"><b>' + esc(f['Raison sociale / Nom']) + '</b><span>' + esc(f.Ville || '') + (f['Téléphone 1'] ? ' · <a href="tel:' + esc(APP.tel(f['Téléphone 1'])) + '">' + esc(f['Téléphone 1']) + '</a>' : '') + '</span>' +
       '<small>' + esc(quand) + (f.traite_par ? ' · noté par ' + esc(f.traite_par) : '') + '</small>' + (f.note ? '<small class="note-ligne">' + esc(f.note) + '</small>' : '') + '</div>' +
       (avecBouton ? '<button type="button" class="btn btn--ghost btn--s" data-ouvrir="' + esc(f._code) + '">Ouvrir' + icon('droite') + '</button>' : '') + '</li>';
   };

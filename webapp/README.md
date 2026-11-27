@@ -10,7 +10,7 @@ Mêmes fonctionnalités et mêmes règles de calcul que l'ancien outil (vérifi�
 | **Synthèse** | Chiffres du jour, rappels à passer, 15 prochains jours, avancement de l'équipe, objectif du 1er septembre 2027 |
 | **Appels** | File d'appel filtrable, fiche client, script d'appel et objections (type de client déduit), résultat de l'appel, administration de la fiche (admin) |
 | **Livraisons** | Vérification des points de livraison : référent sur place, téléphone, statut |
-| **Rappels** | Calendrier mensuel de la charge à venir, liste des clients à rappeler par jour |
+| **Rappels** | Calendrier mensuel de la charge à venir, liste des clients à rappeler par jour ; reprogrammation en lot (cases à cocher ou « Tout sélectionner », puis nouvelle date) : une commerciale déplace ses propres rappels, un admin ceux de n'importe quel compte (règle appliquée par la base, `fificli_reprogrammer_rappels`, tracée au journal et, pour un admin sur le compte d'un autre, dans l'historique des actions du portail) |
 | **Export** (commerciales) | CSV et Excel du suivi et des points de livraison, confirmation d'export |
 | **Pilotage** (manager, admin) | Objectif, performance par commerciale, reporting journalier, journal, tickets, exports (admin), données : import du classeur, restauration CSV, réinitialisation (manager) |
 | **Ticket** (bouton en bas à droite) | Envoi d'un problème, d'une suggestion ou d'une question, avec l'écran concerné ; suivi des réponses |

@@ -51,6 +51,15 @@ async function fauxFetch(url, init = {}) {
   if (u.pathname === '/auth/v1/recover') { t.recover = corps.email; return json({}); }
   if (!u.pathname.startsWith('/rest/v1/')) return json({}, 404);
   const chemin = u.pathname.replace('/rest/v1/', '');
+  if (chemin === 'rpc/fificli_reprogrammer_rappels') {
+    // appelée avec le jeton de la personne (clé publique + Bearer utilisateur) : la base lit l'identité dans le jeton
+    const e = jetons.get((entetes.get('authorization') || '').replace(/^Bearer\s+/i, ''));
+    t.rpcPersonne = { apikey: entetes.get('apikey'), email: e, corps };
+    if (entetes.get('apikey') !== 'cle-anon' || !e) return json({ message: 'JWT invalide' }, 401);
+    if (corps.p_codes.includes('REFUS')) return json({ code: '42501', message: 'Votre profil ne permet pas de reprogrammer des rappels.' }, 403);
+    if (corps.p_vers < '2000-01-01') return json({ code: '22023', message: 'La nouvelle date ne peut pas être dans le passé.' }, 400);
+    return json({ fiches: corps.p_codes.map((c) => ({ code_client: c, rappel_date: corps.p_vers })), ignores: [], serveur_le: '2026-11-27T10:00:00' });
+  }
   if (entetes.get('apikey') !== 'cle-serveur') return json({ message: 'clé refusée' }, 401);
   if (chemin.startsWith('rpc/')) {
     const nom = chemin.slice(4);
@@ -163,6 +172,26 @@ const connexion = async (email) => (await appeler({ action: 'login', email, pass
     const a = await connexion('quentin@exemple.fr'), c = await connexion('chloe@exemple.fr');
     t.rpc = []; assert.strictEqual((await appeler({ action: 'reattribuer', code: 'C00001', traitant: 'Chloé', statut: 'À appeler' }, c.access_token)).statut, 403);
     assert.strictEqual((await appeler({ action: 'reattribuer', code: 'C00001', traitant: 'Inconnu', statut: 'À appeler' }, a.access_token)).statut, 400);
+  });
+  await groupe('reprogrammation des rappels : jeton de la personne transmis à la base, validations, erreurs', async () => {
+    const c = await connexion('chloe@exemple.fr'), m = await connexion('mika@exemple.fr');
+    t.rpcPersonne = null;
+    assert.strictEqual((await appeler({ action: 'rappels_reprogrammer', codes: ['C1'], de: '2026-12-01', vers: '2026-12-05' }, m.access_token)).statut, 403, 'manager refusé');
+    assert.strictEqual(t.rpcPersonne, null, 'refus avant tout appel à la base');
+    assert.strictEqual((await appeler({ action: 'rappels_reprogrammer', codes: [], de: '2026-12-01', vers: '2026-12-05' }, c.access_token)).statut, 400);
+    assert.strictEqual((await appeler({ action: 'rappels_reprogrammer', codes: ['C1'], de: '01/12/2026', vers: '2026-12-05' }, c.access_token)).statut, 400);
+    assert.strictEqual((await appeler({ action: 'rappels_reprogrammer', codes: ['C1'], de: '2026-12-01', vers: 'demain' }, c.access_token)).statut, 400);
+    assert.strictEqual((await appeler({ action: 'rappels_reprogrammer', codes: Array(1001).fill('C'), de: '2026-12-01', vers: '2026-12-05' }, c.access_token)).statut, 400);
+    const ok = await appeler({ action: 'rappels_reprogrammer', codes: ['C1', ' C2 ', 3], de: '2026-12-01', vers: '2026-12-05' }, c.access_token);
+    assert.strictEqual(ok.statut, 200); assert.deepStrictEqual(ok.json.fiches.map((f) => f.code_client), ['C1', 'C2']);
+    assert.strictEqual(t.rpcPersonne.apikey, 'cle-anon', 'jamais la clé serveur'); assert.strictEqual(t.rpcPersonne.email, 'chloe@exemple.fr', 'jeton de la personne connectée');
+    assert.deepStrictEqual(t.rpcPersonne.corps, { p_codes: ['C1', 'C2'], p_de: '2026-12-01', p_vers: '2026-12-05' });
+    const retard = await appeler({ action: 'rappels_reprogrammer', codes: ['C1'], de: 'retard', vers: '2026-12-05' }, c.access_token);
+    assert.strictEqual(retard.statut, 200); assert.strictEqual(t.rpcPersonne.corps.p_de, null, '« en retard » : pas de jour d\'origine');
+    const refuse = await appeler({ action: 'rappels_reprogrammer', codes: ['REFUS'], de: '2026-12-01', vers: '2026-12-05' }, c.access_token);
+    assert.strictEqual(refuse.statut, 403); assert.match(refuse.json.message, /profil/);
+    const passe = await appeler({ action: 'rappels_reprogrammer', codes: ['C1'], de: '2026-12-01', vers: '1999-01-01' }, c.access_token);
+    assert.strictEqual(passe.statut, 400); assert.match(passe.json.message, /passé/);
   });
   await groupe('pilotage : rapport réservé au manager et à l\'administrateur', async () => {
     const c = await connexion('chloe@exemple.fr'), m = await connexion('mika@exemple.fr');

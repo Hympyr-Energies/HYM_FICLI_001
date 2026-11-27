@@ -14,7 +14,7 @@
 // Contrat : POST JSON { action, ... } ; jeton dans « Authorization: Bearer … » pour tout sauf login, refresh et recover.
 //   login {email,password} · refresh {refresh_token} · recover {email} · password {password}
 //   bootstrap {classeur:{clients,adresses}} · delta {since,since_adr} · fiche_enregistrer · adresse_enregistrer
-//   reattribuer · presence · export_confirmer · rapport {jours} · reinitialiser {confirmation}
+//   reattribuer · rappels_reprogrammer {codes, de, vers} · presence · export_confirmer · rapport {jours} · reinitialiser {confirmation}
 //   ticket_creer · ticket_lister · ticket_maj · classeur_ajouter · classeur_publier · restaurer
 //   Erreurs : 400 requête invalide · 401 identifiants/jeton · 403 droits insuffisants · 502 base injoignable.
 
@@ -68,6 +68,13 @@ const rest = (chemin: string, init: RequestInit = {}) =>
     headers: { apikey: ENV.serveur, Authorization: "Bearer " + ENV.serveur, "Content-Type": "application/json", ...(init.headers ?? {}) },
   });
 const rpc = (nom: string, args: unknown) => rest(`/rpc/${nom}`, { method: "POST", body: JSON.stringify(args) });
+/** Fonction SQL appelée AVEC le jeton de la personne : la base lit elle-même l'identité (auth.jwt()) et applique les droits. */
+const rpcPersonne = (nom: string, args: unknown, jeton: string) =>
+  fetch(`${ENV.url}/rest/v1/rpc/${nom}`, {
+    method: "POST", redirect: "manual", body: JSON.stringify(args),
+    headers: { apikey: ENV.anon, Authorization: "Bearer " + jeton, "Content-Type": "application/json" },
+  });
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Lecture complète d'une table (PostgREST plafonne à 1000 lignes par requête). */
 async function tout(chemin: string, ordre: string): Promise<any[]> {
@@ -275,6 +282,25 @@ async function traiter(req: Request): Promise<Response> {
       const r = await rpc("fificli_reattribuer", { p_code: code, p_traitant: traitant, p_statut: statut, p_auteur: m.nom });
       if (!r.ok) { console.error("reattribuer", r.status, await r.text()); return refus("base", "Modification impossible.", 502); }
       return reponse({ fiche: await r.json() });
+    }
+    if (c.action === "rappels_reprogrammer") {
+      // Commerciale : ses propres rappels ; admin : ceux de n'importe quel compte. La règle est appliquée par la base
+      // (fificli_reprogrammer_rappels, sql/18) ; ce premier filtre évite seulement un aller-retour inutile.
+      if (!peutTraiter(m)) return interdit();
+      const codes = Array.isArray(c.codes) ? c.codes.filter((x: unknown) => typeof x === "string" && x.trim()).map((x: string) => x.trim().slice(0, 80)) : [];
+      const de = c.de === null || c.de === "retard" ? null : texte(c.de, 10);
+      const vers = texte(c.vers, 10);
+      if (!codes.length || codes.length > 1000) return refus("requete", "Sélection vide ou trop grande (1000 rappels au maximum).", 400);
+      if ((de !== null && !ISO.test(de)) || !ISO.test(vers)) return refus("requete", "Date invalide.", 400);
+      const r = await rpcPersonne("fificli_reprogrammer_rappels", { p_codes: codes, p_de: de, p_vers: vers }, jeton);
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        console.error("rappels_reprogrammer", r.status, e?.code, e?.message);
+        if (e?.code === "42501") return refus("droits", e.message || "Votre profil ne permet pas cette action.", 403);
+        if (e?.code === "22023") return refus("requete", e.message || "Requête invalide.", 400);
+        return refus("base", "Reprogrammation impossible.", 502);
+      }
+      return reponse(await r.json());
     }
     if (c.action === "presence") {
       if (!peutTraiter(m)) return interdit();

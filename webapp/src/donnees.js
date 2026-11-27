@@ -154,6 +154,14 @@
       integrer(r.fiche, false); D.actualiserBientot(); APP.emettre('donnees', { code: code, local: true }); return r.fiche;
     });
   };
+  /** Reprogrammation en lot : de = jour d'origine (AAAA-MM-JJ) ou 'retard' ; la base vérifie les droits et ignore les fiches modifiées entre-temps. */
+  D.reprogrammerRappels = function (codes, de, vers) {
+    return APP.nuageSur('rappels_reprogrammer', { codes: codes, de: de === 'retard' ? null : de, vers: vers }, 40000).then(function (r) {
+      (r.fiches || []).forEach(function (f) { integrer(f, false); });
+      D.actualiserBientot(); APP.emettre('donnees', { local: true });
+      return { faits: (r.fiches || []).length, ignores: r.ignores || [] };
+    });
+  };
   D.confirmerExport = function () {
     return APP.nuageSur('export_confirmer', {}).then(function (r) { D.dernierExport = r.dernier_export; APP.emettre('donnees', { local: true }); });
   };
